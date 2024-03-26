@@ -5,7 +5,7 @@ stages:
 docs-trigger:
   stage: triggers
   trigger:
-    include: docs/.gitlab-ci.yml
+    include: docs/.docs-ci.yml
   rules:
     - changes:
         - docs/*
@@ -13,7 +13,7 @@ docs-trigger:
 infra-trigger:
   stage: triggers
   trigger:
-    include: infra/.gitlab-ci.yml
+    include: infra/.infra-ci.yml
   rules:
     - changes:
         - infra/*
@@ -21,7 +21,7 @@ infra-trigger:
 robot-trigger:
   stage: triggers
   trigger:
-    include: robot/.gitlab-ci.yml
+    include: robot/.robot-ci.yml
   rules:
     - changes:
         - robot/*
@@ -29,7 +29,7 @@ robot-trigger:
 platform-trigger:
   stage: triggers
   trigger:
-    include: platform/.gitlab-ci.yml
+    include: platform/.platform-ci.yml
   rules:
     - changes:
         - platform/*

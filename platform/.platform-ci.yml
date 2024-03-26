@@ -1,0 +1,20 @@
+build:
+  stage: build
+  script:
+    - echo "building platform!"
+
+unit-tests:
+  stage: test
+  script:
+    - echo "This job runs unit tests."
+
+e2e-tests:
+  stage: test
+  script:
+    - echo "This job runs E2E tests."
+
+release:
+  stage: release
+  environment: production # there's only prod
+  script:
+    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
