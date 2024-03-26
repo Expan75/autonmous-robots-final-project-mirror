@@ -1,0 +1,35 @@
+# delegates to child .yml specified ci jobs
+stages:
+  - triggers
+
+docs-trigger:
+  stage: triggers
+  trigger:
+    include: docs/.gitlab-ci.yml
+  rules:
+    - changes:
+        - docs/*
+
+infra-trigger:
+  stage: triggers
+  trigger:
+    include: infra/.gitlab-ci.yml
+  rules:
+    - changes:
+        - infra/*
+
+robot-trigger:
+  stage: triggers
+  trigger:
+    include: robot/.gitlab-ci.yml
+  rules:
+    - changes:
+        - robot/*
+
+platform-trigger:
+  stage: triggers
+  trigger:
+    include: platform/.gitlab-ci.yml
+  rules:
+    - changes:
+        - platform/*
