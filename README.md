@@ -62,14 +62,14 @@ and make sure its in the right place!
 If you are new to using pull requests and git, [trunk-based-git](https://www.atlassian.com/continuous-delivery/continuous-integration/trunk-based-development) is a great guide for the style of git and project deployment we'll use. Every need service or alteration of an existing service starts with you making a feature branch for the given service. You then make add and commit changes to that feature branch e.g.:
 
 ```bash
-# create a new microservice
+# create a new feature branch. Note its imporant to prepend feature/<mydescription> for the CI/CD to do its job.
 git checkout -B feature/cloud-configuration-server-setup
 
 # create a new microservice from the boilerplates
 cp -r boilerplate/cloud-service-g cloud/configuration-server-setup
 cd cloud-configuration-server-setup
 
-# belwo portion can be repeated multiple times as your contribution includes more changes or files
+# below portion can be repeated multiple times as your contribution includes more changes or files
 echo "hello, world in a textfile" > hello.txt
 
 # add the file (so gut can track changes for it)
