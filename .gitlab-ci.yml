@@ -29,10 +29,10 @@ robot-trigger:
 platform-trigger:
   stage: triggers
   trigger:
-    include: platform/.platform-ci.yml
+    include: cloud/.cloud-ci.yml
   rules:
     - changes:
-        - platform/*
+        - cloud/*
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
