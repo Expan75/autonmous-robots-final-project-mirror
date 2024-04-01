@@ -11,7 +11,6 @@ Team members:
 
 ```bash
 .gitlab-cicd        # main ci/cd specification (pulls child ci/cd specifications from e.g. /robot or /cloud)
-./docker            # dockerfiles for setup
 ./docs              # documentation that is not specific to any one module
 ./infra             # infrastructure as code (Ansible playbooks for automated deployment)
 ./boilerplates      # boilerplates for constructing new services
