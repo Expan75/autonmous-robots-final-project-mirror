@@ -26,7 +26,7 @@ variables:
 
 secret-scan:
   stage: scan
-  tags:
+  tag:
     - docker
   trigger:
     include:
