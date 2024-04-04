@@ -35,4 +35,5 @@ platform-trigger:
         - cloud/*
 
 include:
+  - stage: pre
   - template: Security/Secret-Detection.gitlab-ci.yml
