@@ -1,45 +1,83 @@
-# delegates to child .yml specified ci jobs
-# trigger
 stages:
-  - pre
-  - triggers
+  - scan
+  - build
+  - test
+  - release
 
-include:
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
+tags:
+  - docker
 
-secret_detection:
-  stage: pre
+# base pipe triggers on every change everywhere
+# We to override this on a case by case basis
+variables:
+  RULES_CHANGES_PATH: "**/*"
+
+.base-rules:
+  rules:
+    # always run for main
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    # avoid creation of duplicate jobs for pushing to PR
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    # only way of getting proper handling of glob paths
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - $RULES_CHANGES_PATH
+    - when: manual
+      allow_failure: true
+
+secret-scan:
+  stage: scan
   tags:
     - docker
-
-docs-trigger:
-  stage: triggers
   trigger:
-    include: docs/.docs-ci.yml
-  rules:
-    - changes:
-        - docs/*
+    include:
+      - template: Jobs/Secret-Detection.gitlab-ci.yml
 
-infra-trigger:
-  stage: triggers
-  trigger:
-    include: infra/.infra-ci.yml
-  rules:
-    - changes:
-        - infra/*
+.docs-cicd-rules:
+  extends: .base-rules
+  variables:
+    RULES_CHANGES_PATH: "docs/**"
 
-robot-trigger:
-  stage: triggers
-  trigger:
-    include: robot/.robot-ci.yml
-  rules:
-    - changes:
-        - robot/*
+.infra-cicd-rules:
+  extends: .base-rules
+  variables:
+    RULES_CHANGES_PATH: "infra/**"
 
-platform-trigger:
-  stage: triggers
+.cloud-cicd-rules:
+  extends: .base-rules
+  variables:
+    RULES_CHANGES_PATH: "cloud/**"
+
+.robot-cicd-rules:
+  extends: .base-rules
+  variables:
+    RULES_CHANGES_PATH: "robot/**"
+
+docs-cicd:
+  extends: .docs-cicd-rules
+  stage: build
+  needs: []
   trigger:
-    include: cloud/.cloud-ci.yml
-  rules:
-    - changes:
-        - cloud/*
+    include: "docs/.docs-ci.yml"
+
+infra-cicd:
+  stage: build
+  needs: []
+  trigger:
+    include: "infra/.infra-ci.yml"
+
+robot-cicd:
+  stage: build
+  needs: []
+  trigger:
+    include: "robot/.robot-ci.yml"
+
+cloud-cicd:
+  stage: build
+  needs: []
+  trigger:
+    include: "cloud/.cloud-ci.yml"

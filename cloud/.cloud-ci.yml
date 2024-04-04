@@ -1,7 +1,15 @@
+before_script:
+  - cd cloud
+
+stages:
+  - build
+  - test
+  - release
+
 build:
   stage: build
   script:
-    - echo "building platform!"
+    - echo "building cloud!"
 
 unit-tests:
   stage: test
@@ -13,8 +21,7 @@ e2e-tests:
   script:
     - echo "This job runs E2E tests."
 
-release:
+push:
   stage: release
-  environment: production # there's only prod
   script:
     - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."

@@ -1,15 +1,14 @@
-# delegates to child .yml specified ci jobs for each service
-before_scipt:
-  - cd robot
+# similar to project level delegation but actually delegates 
+# to actual service CICD pipes that builds things.
 
-stages:
-  - triggers
+.cpp-robot-service-template
+  extends: .base-rules
+  variables:
+    RULES_CHANGES_PATH: "robots/cpp-robot-service-template/**"
 
-- cpp-robot-service-trigger:
-  stage: triggers 
-  trigger:
-    include: cpp-robot-service-template/cpp-robot-service-ci.yml
-  rules:
-    - changes:
-        - cpp-robot-service-template/*
+cicd-cpp-robot-service-template:
+  stage: build
+  needs: []
+  include:
+    - local: robot/cpp-robot-service-template/.robot-service-ci.yml
 
