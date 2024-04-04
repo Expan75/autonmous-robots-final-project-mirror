@@ -1,4 +1,5 @@
 # delegates to child .yml specified ci jobs
+# trigger
 stages:
   - pre
   - triggers
