@@ -3,10 +3,10 @@ before_scipt:
   - cd robot
 
 stages:
-  - service-triggers
+  - triggers
 
 - cpp-robot-service-trigger:
-  stage: service-triggers 
+  stage: triggers 
   trigger:
     include: cpp-robot-service-template/cpp-robot-service-ci.yml
   rules:
