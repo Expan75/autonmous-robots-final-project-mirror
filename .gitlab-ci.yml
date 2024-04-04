@@ -65,6 +65,8 @@ variables:
     RULES_CHANGES_PATH: "robot/**"
 
 flag-leaked-secrets:
+  tags:
+    - docker
   extends: .secret-analyzer
   rules:
     - if: $SECRET_DETECTION_DISABLED == 'true' || $SECRET_DETECTION_DISABLED == '1'
