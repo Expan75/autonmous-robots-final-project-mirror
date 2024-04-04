@@ -12,7 +12,7 @@ variables:
     when: always
 
 .robot-service-template:
-  extends: .base-rules
+  extends: .base_rules
   variables:
     RULES_CHANGES_PATH: "robot/cpp-robot-service-template/**"
 
