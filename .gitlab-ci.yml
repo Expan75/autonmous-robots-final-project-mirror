@@ -3,10 +3,11 @@ stages:
   - pre
   - triggers
 
-flag-leaked-secrets:
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+secret_detection:
   stage: pre
-  include:
-    - template: Security/Secret-Detection.gitlab-ci.yml
 
 docs-trigger:
   stage: triggers
