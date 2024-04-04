@@ -9,7 +9,9 @@ include:
 
 secret_detection:
   stage: pre
-  paths: ./*
+  artifacts:
+    paths:
+      - ./*
 
 docs-trigger:
   stage: triggers
