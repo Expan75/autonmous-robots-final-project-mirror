@@ -25,4 +25,4 @@ robot-service-template:
   stage: build
   needs: []
   trigger:
-    include: "robot/cpp-robot-service-template/.robot-ci.yml"
+    include: "robot/cpp-robot-service-template/.robot-service-ci.yml"
