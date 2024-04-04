@@ -9,11 +9,6 @@ include:
 
 secret_detection:
   stage: pre
-  artifacts:
-    paths:
-      - infra/*
-      - cloud/*
-      - robot/*
 
 docs-trigger:
   stage: triggers
