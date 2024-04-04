@@ -1,8 +1,5 @@
 # delegates to child .yml specified ci jobs
 # trigger
-tags:
-  - docker
-
 stages:
   - pre
   - triggers
@@ -12,6 +9,8 @@ include:
 
 secret_detection:
   stage: pre
+  tags:
+    - docker
 
 docs-trigger:
   stage: triggers
