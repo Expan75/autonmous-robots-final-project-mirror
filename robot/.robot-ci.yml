@@ -9,6 +9,7 @@ variables:
 
 .base_rules:
   - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+    when: always
 
 .robot-service-template:
   extends: .base-rules
