@@ -4,7 +4,7 @@ stages:
   - triggers
 
 flag-leaked-secrets:
-  - stage: pre
+  stage: pre
   include:
     - template: Security/Secret-Detection.gitlab-ci.yml
 
