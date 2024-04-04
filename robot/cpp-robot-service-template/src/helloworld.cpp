@@ -21,7 +21,7 @@ int32_t main(int32_t, char **) {
 
   while (od4.isRunning()) {
     uint16_t value;
-    std::cout << "Enter a number to check:" << std::endl;
+    std::cout << "Enter a positive number to check:" << std::endl;
     std::cin >> value;
     MyTestMessage1 msg;
     msg.myValue(value);

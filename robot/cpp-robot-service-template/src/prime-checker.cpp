@@ -1,9 +1,8 @@
+#include "prime-checker.hpp"
 #include <cstdint>
 #include <iostream>
 
-#include "prime-checker.hpp"
-
-// slighly rewritten to avoid nesting and unnessary declarations
+// just here to test things
 bool PrimeChecker::isPrime(uint16_t n) {
   if (n < 2 || (n % 2 == 0 && n != 2)) {
     return false;

@@ -23,6 +23,7 @@ const std::set<int> VALID_PRIMES = {
     1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163,
     1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223};
 
+// comment here to trigger tests
 TEST_CASE("Should only flag primes as prime") {
   for (int n = 0; n < MAX_PRIME; n++) {
     UNSCOPED_INFO("number: " << n);
