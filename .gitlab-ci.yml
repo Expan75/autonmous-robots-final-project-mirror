@@ -1,5 +1,7 @@
 # delegates to child .yml specified ci jobs
 # trigger
+image: docker
+
 stages:
   - pre
   - triggers
