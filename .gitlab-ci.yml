@@ -3,6 +3,7 @@ include:
 
 # delegates to child .yml specified ci jobs
 stages:
+  - .pre
   - triggers
 
 docs-trigger:
