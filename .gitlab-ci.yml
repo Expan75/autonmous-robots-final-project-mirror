@@ -2,9 +2,6 @@ stages:
   - scan
   - build
 
-tags:
-  - docker
-
 # base pipe triggers on every change everywhere
 # We to override this on a case by case basis
 variables:
