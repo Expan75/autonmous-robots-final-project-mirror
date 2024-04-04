@@ -76,24 +76,24 @@ flag-leaked-secrets:
 docs-cicd:
   extends: .docs-cicd-rules
   stage: build
-  needs: ["secret-scan"]
+  needs: ["flag-leaked-secrets"]
   trigger:
     include: "docs/.docs-ci.yml"
 
 infra-cicd:
   stage: build
-  needs: ["secret-scan"]
+  needs: ["flag-leaked-secrets"]
   trigger:
     include: "infra/.infra-ci.yml"
 
 robot-cicd:
   stage: build
-  needs: ["secret-scan"]
+  needs: ["flag-leaked-secrets"]
   trigger:
     include: "robot/.robot-ci.yml"
 
 cloud-cicd:
   stage: build
-  needs: ["secret-scan"]
+  needs: ["flag-leaked-secrets"]
   trigger:
     include: "cloud/.cloud-ci.yml"
