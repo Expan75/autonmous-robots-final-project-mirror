@@ -26,6 +26,8 @@ variables:
 
 secret-scan:
   stage: scan
+  tags:
+    - docker
   trigger:
     include:
       - template: Jobs/Secret-Detection.gitlab-ci.yml
