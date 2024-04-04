@@ -53,24 +53,24 @@ secret-scan:
 docs-cicd:
   extends: .docs-cicd-rules
   stage: build
-  needs: []
+  needs: ["secret-scan"]
   trigger:
     include: "docs/.docs-ci.yml"
 
 infra-cicd:
   stage: build
-  needs: []
+  needs: ["secret-scan"]
   trigger:
     include: "infra/.infra-ci.yml"
 
 robot-cicd:
   stage: build
-  needs: []
+  needs: ["secret-scan"]
   trigger:
     include: "robot/.robot-ci.yml"
 
 cloud-cicd:
   stage: build
-  needs: []
+  needs: ["secret-scan"]
   trigger:
     include: "cloud/.cloud-ci.yml"
