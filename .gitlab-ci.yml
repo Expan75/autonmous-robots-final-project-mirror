@@ -31,7 +31,7 @@ variables:
       allow_failure: true
 
 # uses gitlab template without importing
-.secret-scan:
+.secret-analyzer:
   stage: scan
   image: "$SECURE_ANALYZERS_PREFIX/secrets:$SECRETS_ANALYZER_VERSION$SECRET_DETECTION_IMAGE_SUFFIX"
   services: []
@@ -43,15 +43,6 @@ variables:
   artifacts:
     reports:
       secret_detection: gl-secret-detection-report.json
-
-secret_detection:
-  extends: .secret-analyzer
-  rules:
-    - if: $SECRET_DETECTION_DISABLED == 'true' || $SECRET_DETECTION_DISABLED == '1'
-      when: never
-    - if: $CI_COMMIT_BRANCH
-  script:
-    - /analyzer run
 
 .docs-cicd-rules:
   extends: .base-rules
@@ -72,6 +63,15 @@ secret_detection:
   extends: .base-rules
   variables:
     RULES_CHANGES_PATH: "robot/**"
+
+flag-leaked-secrets:
+  extends: .secret-analyzer
+  rules:
+    - if: $SECRET_DETECTION_DISABLED == 'true' || $SECRET_DETECTION_DISABLED == '1'
+      when: never
+    - if: $CI_COMMIT_BRANCH
+  script:
+    - /analyzer run
 
 docs-cicd:
   extends: .docs-cicd-rules
