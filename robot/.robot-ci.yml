@@ -1,4 +1,4 @@
-# similar to project level delegation but actually delegates 
+# similar to project level delegation but actually delegates
 # to actual service CICD pipes that builds things.
 
 stages:
@@ -10,14 +10,13 @@ variables:
 .base_rules:
   - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
 
-.robot-service-template
+.robot-service-template:
   extends: .base-rules
   variables:
     RULES_CHANGES_PATH: "robot/cpp-robot-service-template/**"
 
 robot-service-template:
-  stage: build 
+  stage: build
   needs: []
   include:
     - local: robot/cpp-robot-service-template/.robot-service-ci.yml
-
