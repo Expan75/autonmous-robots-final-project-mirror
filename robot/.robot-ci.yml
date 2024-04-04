@@ -7,7 +7,7 @@ stages:
 variables:
   RULES_CHANGES_PATH: "robot/**"
 
-.base_rules
+.base_rules:
   - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
 
 .robot-service-template
