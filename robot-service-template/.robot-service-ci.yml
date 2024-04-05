@@ -12,7 +12,7 @@ stages:
   - release
 
 build-amd64:
-  tags: { "docker-build" }
+  tags: ["docker-build"]
   stage: build
   script:
     - docker build .
@@ -20,7 +20,7 @@ build-amd64:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 push:
-  tags: { "docker-build" }
+  tags: ["docker-build"]
   stage: release
   script:
     - docker build -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
