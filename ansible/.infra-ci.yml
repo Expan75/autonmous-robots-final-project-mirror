@@ -1,0 +1,22 @@
+before_script:
+  - cd ansible
+
+stages:
+  - lint
+  - test
+  - release
+
+build:
+  stage: lint
+  script:
+    - echo "linting playbooks"
+
+test:
+  stage: test
+  script:
+    - echo "Running unit tests for all playbooks"
+
+release:
+  stage: release
+  script:
+    - echo "Rreleasing new playbooks"
