@@ -30,4 +30,4 @@ push:
     # interpolation insdie regex strings are not supported in gitlab
     # we force all tags to prepend the service name and suffix versions
     # with a valid semantic version; see https://semver.org/ for more info
-    - if: $CI_COMMIT_TAG =~ /^robot-service-template-v(\d+.){1,2}\d+$/"
+    - if: $CI_COMMIT_TAG =~ /^robot-service-template-v(\d+.){1,2}\d+$/
