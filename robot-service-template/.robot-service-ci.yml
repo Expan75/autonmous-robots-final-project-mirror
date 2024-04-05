@@ -27,4 +27,4 @@ push:
     - docker buildx create --name multiplatformbuilder --use
     - docker buildx build --platform "$PLATFORMS" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
   rules:
-    - if: $CI_COMMIT_TAG =~ /^[0-9.]+$/
+    - if: $CI_COMMIT_TAG =~ RobotService/^[0-9.]+$/
