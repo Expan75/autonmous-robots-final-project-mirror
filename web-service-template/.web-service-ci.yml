@@ -1,3 +1,5 @@
+image: docker-build
+
 before_script:
   - cd web-service-template
 

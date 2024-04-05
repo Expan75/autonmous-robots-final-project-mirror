@@ -1,19 +1,17 @@
-image: docker
+image: docker-build
 
 services:
   - name: docker:dind
-
-stages:
-  - build
-  - release
 
 before_script:
   - cd robot-service-template
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
+stages:
+  - build
+  - release
+
 build-amd64:
-  tags:
-    - gitlab-org-docker
   stage: build
   script:
     - docker build .
@@ -21,8 +19,6 @@ build-amd64:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 push:
-  tags:
-    - gitlab-org-docker
   stage: release
   script:
     - docker build -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
