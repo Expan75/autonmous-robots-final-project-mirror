@@ -65,33 +65,32 @@ variables:
   variables:
     RULES_CHANGES_PATH: "WebServiceTemplate/**"
 
-jobs:
-  flag-leaked-secrets:
-    tags:
-      - docker
-    extends: .secret-scan-rules
-    rules:
-      - if: $CI_COMMIT_BRANCH
-    script:
-      - /analyzer run
+flag-leaked-secrets:
+  tags:
+    - docker
+  extends: .secret-scan-rules
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  script:
+    - /analyzer run
 
-  build-docs:
-    extends: .docs-rules
-    stage: build
-    trigger:
-      include: "docs/.docs-ci.yml"
+build-docs:
+  extends: .docs-rules
+  stage: build
+  trigger:
+    include: "docs/.docs-ci.yml"
 
-  build-ansible:
-    stage: build
-    trigger:
-      include: "ansible/.ansible-ci.yml"
+build-ansible:
+  stage: build
+  trigger:
+    include: "ansible/.ansible-ci.yml"
 
-  build-robot-service-template:
-    stage: build
-    trigger:
-      include: "robot-service-tmplate-rules/.robot-service-ci.yml"
+build-robot-service-template:
+  stage: build
+  trigger:
+    include: "robot-service-tmplate-rules/.robot-service-ci.yml"
 
-  build-web-service-template:
-    stage: build
-    trigger:
-      include: "web-service-template-rules/.web-service-ci.yml"
+build-web-service-template:
+  stage: build
+  trigger:
+    include: "web-service-template-rules/.web-service-ci.yml"
