@@ -88,9 +88,9 @@ build-ansible:
 build-robot-service-template:
   stage: build
   trigger:
-    include: "robot-service-template-rules/.robot-service-ci.yml"
+    include: "robot-service-template/.robot-service-ci.yml"
 
 build-web-service-template:
   stage: build
   trigger:
-    include: "web-service-template-rules/.web-service-ci.yml"
+    include: "web-service-template/.web-service-ci.yml"
