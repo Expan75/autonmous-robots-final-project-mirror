@@ -24,8 +24,7 @@ push:
   stage: release
   script:
     - docker run --privileged --rm tonistiigi/binfmt --install all
-    - docker context create multiplatformbuilder
-    - docker buildx create --name multiplatformbuilder --use
+    - docker buildx create --use --bootstrap --name multiplatformbuilder
     - docker buildx build --platform "$PLATFORMS" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
   rules:
     # interpolation insdie regex strings are not supported in gitlab
