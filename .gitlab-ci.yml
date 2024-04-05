@@ -76,7 +76,7 @@ jobs:
       - /analyzer run
 
   build-docs:
-    extends: .docs-cicd-rules
+    extends: .docs-rules
     stage: build
     trigger:
       include: "docs/.docs-ci.yml"
