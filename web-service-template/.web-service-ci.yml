@@ -1,5 +1,5 @@
 before_script:
-  - cd cloud
+  - cd web-service-template
 
 stages:
   - build
