@@ -27,6 +27,7 @@ push:
     - docker buildx create --name multiplatformbuilder --use
     - docker buildx build --platform "$PLATFORMS" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
   rules:
-    # note that the name of the service needs to be prepended to release tags!
-    # Gitlab does not support interpolation inside of regex strings.
-    - if: $CI_COMMIT_TAG =~ /^robot-service-template-(\d+\.\d+\.\d+)$/
+    # interpolation insdie regex strings are not supported in gitlab
+    # we force all tags to prepend the service name and suffix versions
+    # with a valid semantic version; see https://semver.org/ for more info
+    - if: $CI_COMMIT_TAG =~ /^robot-service-template-v(\d+.){1,2}\d+$/"
