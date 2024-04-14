@@ -94,3 +94,8 @@ build-web-service-template:
   stage: build
   trigger:
     include: "web-service-template/.web-service-ci.yml"
+    
+build-perception:
+  stage: build
+  trigger:
+    include: "perception/.perception-ci.yml"
