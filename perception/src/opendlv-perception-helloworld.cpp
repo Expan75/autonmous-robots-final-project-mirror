@@ -219,16 +219,19 @@ int32_t main(int32_t argc, char **argv)
           // Ignore outlier yellow cones in wrong position
           if ( cPArray_b.size() > 0 && cPArray_y[i].x > hsv.cols *3 / 4 )
           {
+            cv::circle( img, cv::Point2f(cPArray_y[i].x, cPArray_y[i].y + img.rows/2), 5, cv::Scalar(0, 0, 255), cv::FILLED); //red point for point which were filtered out
             continue;
           }
 
           // Ignore too far away outliers
           if ( cPArray_y.size() > 1 && std::abs(cPArray_y[i].x - cPArray_y[i - 1].x) > hsv.cols / 3  )
           {
+            cv::circle( img, cv::Point2f(cPArray_y[i].x, cPArray_y[i].y + img.rows/2), 5, cv::Scalar(0, 0, 255), cv::FILLED); //red point for point which were filtered out
             continue;
           }
 
           // Push the process point to the new array
+          cv::circle( img, cv::Point2f(cPArray_y[i].x, cPArray_y[i].y + img.rows/2), 5, cv::Scalar(0, 255, 0), cv::FILLED); //green point for point which were not filtered out
           cPArray_y_temp.push_back(cPArray_y[i]);
         }
         
@@ -237,17 +240,21 @@ int32_t main(int32_t argc, char **argv)
         for ( std::size_t i = 0; i < cPArray_b.size(); i++ )
         {
           // Ignore outlier origin && blue cones in wrong position
-          if ( cPArray_b[i].x < hsv.cols / 2 ){
+          if ( cPArray_b[i].x < hsv.cols / 2 )
+          {
+            cv::circle( img, cv::Point2f(cPArray_b[i].x, cPArray_b[i].y + img.rows/2), 5, cv::Scalar(0, 0, 255), cv::FILLED); //red point for point which were filtered out
             continue;
           }
 
           // Ignore too far away outliers
           if ( cPArray_b.size() > 1 && std::abs(cPArray_b[i].x - cPArray_b[i - 1].x) > hsv.cols / 4  )
           {
+            cv::circle( img, cv::Point2f(cPArray_b[i].x, cPArray_b[i].y + img.rows/2), 5, cv::Scalar(0, 0, 255), cv::FILLED); //red point for point which were filtered out
             continue;
           }
 
           // Push the process point to the new array
+          cv::circle( img, cv::Point2f(cPArray_b[i].x, cPArray_b[i].y + img.rows/2), 5, cv::Scalar(0, 255, 0), cv::FILLED); //green point for point which were not filtered out
           cPArray_b_temp.push_back(cPArray_b[i]);
         }
 
