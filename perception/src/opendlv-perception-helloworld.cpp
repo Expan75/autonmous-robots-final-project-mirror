@@ -179,14 +179,14 @@ int32_t main(int32_t argc, char **argv)
             float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
 
             // Ignore car
-            if ( ( center_x > hsv.cols / 5 && hsv.cols - center_x > hsv.cols / 5 ) && hsv.rows / 2 - center_y <= hsv.rows / 7 ){
+            /*if ( ( center_x > hsv.cols / 5 && hsv.cols - center_x > hsv.cols / 5 ) && hsv.rows / 2 - center_y <= hsv.rows / 7 ){
               continue;
             }
-
+            */ // Uncommented in order to be able to use the contour vectors (otherwise length would be different)
             // Put the point into the vector
             cPArray_y.push_back(cv::Point2f(center_x, center_y ));
         }
-        std::sort(cPArray_y.begin(), cPArray_y.end(), comparePointx); // Sort the vector for later use
+        //std::sort(cPArray_y.begin(), cPArray_y.end(), comparePointx); // Sort the vector for later use
         
         // Dealing with blue cones first
         for ( std::size_t i = 0; i < contours_blue.size(); i++ )
@@ -195,71 +195,88 @@ int32_t main(int32_t argc, char **argv)
             float center_x = static_cast<float>(M.m10 / (M.m00 + 1e-5));
             float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
 
-            // Ignore car
+            /*// Ignore car
             if ( ( center_x > hsv.cols / 5 && hsv.cols - center_x > hsv.cols / 5 ) && hsv.rows / 2 - center_y <= hsv.rows / 7 ){
               continue;
             }
-
+            */ // Uncommented in order to be able to use the contour vectors (otherwise length would be different)
             // put the point into the vector
             cPArray_b.push_back(cv::Point2f(center_x, center_y ));
         }
-        std::sort(cPArray_b.begin(), cPArray_b.end(), comparePointx); // Sort the vector for later use
-
+        //std::sort(cPArray_b.begin(), cPArray_b.end(), comparePointx); // Sort the vector for later use
+        
         // Process two vector, mainly to further remove outliers
         // Yellow cones part
         std::vector<cv::Point2f> cPArray_y_temp;
+        //Creating boundry boxes
+        std::vector<std::vector<cv::Point2f>> cPoly_y(contours_yellow.size());
+        std::vector<cv::Rect> boundRect_y(contours_yellow.size());
         for ( std::size_t i = 0; i < cPArray_y.size(); i++ )
         {
-          // Ignore outlier origin
+          // Color depending wheter the point has sorted out or not
+          cv::Scalar colorBoundry(0,0,0);
+          
           if (i == 0 && cPArray_y[0].x > hsv.cols / 2)
           {
-            continue;
-          }          
-
-          // Ignore outlier yellow cones in wrong position
-          if ( cPArray_b.size() > 0 && cPArray_y[i].x > hsv.cols *3 / 4 )
+            // Ignore outlier origin
+            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
+          }    
+          else if ( cPArray_b.size() > 0 && cPArray_y[i].x > hsv.cols *3 / 4 )
           {
-            cv::circle( img, cv::Point2f(cPArray_y[i].x, cPArray_y[i].y + img.rows/2), 5, cv::Scalar(0, 0, 255), cv::FILLED); //red point for point which were filtered out
-            continue;
+            // Ignore outlier yellow cones in wrong position
+            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
           }
-
-          // Ignore too far away outliers
-          if ( cPArray_y.size() > 1 && std::abs(cPArray_y[i].x - cPArray_y[i - 1].x) > hsv.cols / 3  )
+          else if ( cPArray_y.size() > 1 && std::abs(cPArray_y[i].x - cPArray_y[i - 1].x) > hsv.cols / 3  )
           {
-            cv::circle( img, cv::Point2f(cPArray_y[i].x, cPArray_y[i].y + img.rows/2), 5, cv::Scalar(0, 0, 255), cv::FILLED); //red point for point which were filtered out
-            continue;
+            // Ignore too far away outliers
+            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
           }
-
-          // Push the process point to the new array
-          cv::circle( img, cv::Point2f(cPArray_y[i].x, cPArray_y[i].y + img.rows/2), 5, cv::Scalar(0, 255, 0), cv::FILLED); //green point for point which were not filtered out
-          cPArray_y_temp.push_back(cPArray_y[i]);
+          else 
+          {
+            // Push the process point to the new array
+            cPArray_y_temp.push_back(cPArray_y[i]);
+            colorBoundry = cv::Scalar(0, 255, 0); //green if not sorted out
+          }
+          //Draw the boundry boxes and the point of the center with red if sorted out by the if cases or green if not
+          cv::circle( img, cv::Point2f(cPArray_y[i].x, cPArray_y[i].y + img.rows/2), 5, colorBoundry, cv::FILLED); 
+          cv::approxPolyDP( contours_yellow[i], cPoly_y[i], 1, true);
+          boundRect_y[i] = boundingRect(cPoly_y[i]);
+          rectangle(img, boundRect_y[i].tl()+cv::Point(0,img.rows/2), boundRect_y[i].br()+cv::Point(0,img.rows/2), colorBoundry, 1);
+          
         }
         
         // Blue cones part
         std::vector<cv::Point2f> cPArray_b_temp;
+
+        //Creating boundry boxes
+        std::vector<std::vector<cv::Point2f>> cPoly_b(contours_blue.size());
+        std::vector<cv::Rect> boundRect_b(contours_blue.size());
         for ( std::size_t i = 0; i < cPArray_b.size(); i++ )
         {
-          // Ignore outlier origin && blue cones in wrong position
+          // Color depending wheter the point has sorted out or not
+          cv::Scalar colorBoundry(0,0,0);
+         
           if ( cPArray_b[i].x < hsv.cols / 2 )
+          { // Ignore outlier origin && blue cones in wrong position
+            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
+          } else if ( cPArray_b.size() > 1 && std::abs(cPArray_b[i].x - cPArray_b[i - 1].x) > hsv.cols / 4  )
+          { // Ignore too far away outliers
+            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
+          } else
           {
-            cv::circle( img, cv::Point2f(cPArray_b[i].x, cPArray_b[i].y + img.rows/2), 5, cv::Scalar(0, 0, 255), cv::FILLED); //red point for point which were filtered out
-            continue;
+            // Push the process point to the new array
+            cPArray_b_temp.push_back(cPArray_b[i]);
+            colorBoundry = cv::Scalar(0, 255, 0); //green if send to the steering algorithm
           }
-
-          // Ignore too far away outliers
-          if ( cPArray_b.size() > 1 && std::abs(cPArray_b[i].x - cPArray_b[i - 1].x) > hsv.cols / 4  )
-          {
-            cv::circle( img, cv::Point2f(cPArray_b[i].x, cPArray_b[i].y + img.rows/2), 5, cv::Scalar(0, 0, 255), cv::FILLED); //red point for point which were filtered out
-            continue;
-          }
-
-          // Push the process point to the new array
-          cv::circle( img, cv::Point2f(cPArray_b[i].x, cPArray_b[i].y + img.rows/2), 5, cv::Scalar(0, 255, 0), cv::FILLED); //green point for point which were not filtered out
-          cPArray_b_temp.push_back(cPArray_b[i]);
+          //Draw the boundry boxes and the point of the center with red if sorted out by the if cases or green if not
+          cv::circle( img, cv::Point2f(cPArray_b[i].x, cPArray_b[i].y + img.rows/2), 5, colorBoundry, cv::FILLED); 
+          cv::approxPolyDP( contours_blue[i], cPoly_b[i], 1, true);
+          boundRect_b[i] = boundingRect(cPoly_b[i]);
+          rectangle(img, boundRect_b[i].tl()+cv::Point(0,img.rows/2), boundRect_b[i].br()+cv::Point(0,img.rows/2), colorBoundry, 1);
         }
 
         // Sort two vectors for later use
-        std::sort(cPArray_b_temp.begin(), cPArray_b_temp.end(), comparePointy);        
+        std::sort(cPArray_b_temp.begin(), cPArray_b_temp.end(), comparePointy);      
         std::sort(cPArray_y_temp.begin(), cPArray_y_temp.end(), comparePointy);
 
         // Send message to another microservice
