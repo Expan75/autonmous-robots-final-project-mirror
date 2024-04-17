@@ -1,6 +1,6 @@
 stages:
   - scan
-  - build
+  - trigger
 
 # base pipe triggers on every change everywhere
 # We to override this on a case by case basis
@@ -30,24 +30,7 @@ variables:
     - when: manual
       allow_failure: true
 
-.ansible-rules:
-  extends: .base-rules
-  variables:
-    RULES_CHANGES_PATH: "ansible/**"
-
-# overrides of rulesset on a service by service basis
-.docs-rules:
-  extends: .base-rules
-  variables:
-    RULES_CHANGES_PATH: "docs/**"
-
-.robot-service-tmplate-rules:
-  extends: .base-rules
-  variables:
-    RULES_CHANGES_PATH: "RobotServiceTemplate/**"
-
-# uses gitlab template without importing
-.secret-scan-rules:
+flag-leaked-secrets:
   stage: scan
   image: "$SECURE_ANALYZERS_PREFIX/secrets:$SECRETS_ANALYZER_VERSION$SECRET_DETECTION_IMAGE_SUFFIX"
   services: []
@@ -60,12 +43,6 @@ variables:
     reports:
       secret_detection: gl-secret-detection-report.json
 
-.web-service-template-rules:
-  extends: .base-rules
-  variables:
-    RULES_CHANGES_PATH: "WebServiceTemplate/**"
-
-flag-leaked-secrets:
   tags:
     - docker
   extends: .secret-scan-rules
@@ -74,28 +51,42 @@ flag-leaked-secrets:
   script:
     - /analyzer run
 
-build-docs:
-  extends: .docs-rules
-  stage: build
+docs:
+  extends: .base-rules
+  stage: trigger
   trigger:
     include: "docs/.docs-ci.yml"
+  variables:
+    RULES_CHANGES_PATH: "docs/**"
 
-build-ansible:
-  stage: build
+ansible:
+  stage: trigger
+  extends: .base-rules
   trigger:
     include: "ansible/.ansible-ci.yml"
+  variables:
+    RULES_CHANGES_PATH: "ansible/**"
 
-build-robot-service-template:
-  stage: build
+robot-service-template:
+  stage: trigger
+  extends: .base-rules
   trigger:
     include: "robot-service-template/.robot-service-ci.yml"
+  variables:
+    RULES_CHANGES_PATH: "robot-service-template/**"
 
-build-web-service-template:
-  stage: build
+web-service-template:
+  stage: trigger
+  extends: .base-rules
   trigger:
     include: "web-service-template/.web-service-ci.yml"
-    
-build-perception:
-  stage: build
+  variables:
+    RULES_CHANGES_PATH: "web-service-template/**"
+
+robot-perception-service:
+  extends: .base-rules
+  stage: trigger
   trigger:
     include: "perception/.perception-ci.yml"
+  variables:
+    RULES_CHANGES_PATH: "perception/**"
