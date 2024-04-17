@@ -30,8 +30,15 @@ variables:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - "$SERVICE_DIRECTORY/**"
+  
+  script:
+    - echo "service CI/CD pipeline triggered"
+    - echo SERVICE_NAME=$SERVICE_NAME
+    - echo SERVICE_DIRECTORY=$SERVICE_DIRECTORY
+    - echo SERVICE_TAG_PREFIX=$SERVICE_TAG_PREFIX
+
   trigger:
-    include: "$SERVICE_DIRECTORY/.*-ci.yml"
+    include: "$SERVICE_DIRECTORY/.*-ci.yml
 
 flag-leaked-secrets:
   stage: scan
