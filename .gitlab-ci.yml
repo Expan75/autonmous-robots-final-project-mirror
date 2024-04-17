@@ -1,5 +1,6 @@
 stages:
   - scan
+  - debug
   - trigger
 
 variables:
@@ -31,15 +32,13 @@ variables:
       changes:
         - "$SERVICE_DIRECTORY/**"
 
-  script:
-    - echo "service CI/CD pipeline triggered"
-    - echo SERVICE_NAME=$SERVICE_NAME
-    - echo SERVICE_DIRECTORY=$SERVICE_DIRECTORY
-    - echo SERVICE_TAG_PREFIX=$SERVICE_TAG_PREFIX
-
   trigger:
     include:
       - local: "$SERVICE_DIRECTORY/.*-ci.yml"
+
+.debug:
+  script:
+    - printenv | grep SERVICE
 
 flag-leaked-secrets:
   stage: scan
@@ -61,24 +60,39 @@ flag-leaked-secrets:
 docs:
   variables:
     SERVICE_NAME: "docs"
-  extends: .base-job
+  extends:
+    - .debug
+    - .base-job
+    - .debug
 
 ansible:
   variables:
     SERVICE_NAME: "ansible"
-  extends: .base-job
+  extends:
+    - .debug
+    - .base-job
+    - .debug
 
 robot-service-template:
   variables:
     SERVICE_NAME: "robot-service-template"
-  extends: .base-job
+  extends:
+    - .debug
+    - .base-job
+    - .debug
 
 web-service-template:
   variables:
     SERVICE_NAME: "web-service-template"
-  extends: .base-job
+  extends:
+    - .debug
+    - .base-job
+    - .debug
 
 robot-perception-service:
   variables:
     SERVICE_NAME: "perception"
-  extends: .base-job
+  extends:
+    - .debug
+    - .base-job
+    - .debug
