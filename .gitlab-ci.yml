@@ -1,6 +1,5 @@
 stages:
   - scan
-  - debug
   - trigger
 
 variables:
@@ -36,10 +35,6 @@ variables:
     include:
       - local: "$SERVICE_DIRECTORY/.*-ci.yml"
 
-.debug:
-  script:
-    - printenv | grep SERVICE
-
 flag-leaked-secrets:
   stage: scan
   image: "$SECURE_ANALYZERS_PREFIX/secrets:$SECRETS_ANALYZER_VERSION$SECRET_DETECTION_IMAGE_SUFFIX"
@@ -60,39 +55,24 @@ flag-leaked-secrets:
 docs:
   variables:
     SERVICE_NAME: "docs"
-  extends:
-    - .debug
-    - .base-job
-    - .debug
+  extends: .base-job
 
 ansible:
   variables:
     SERVICE_NAME: "ansible"
-  extends:
-    - .debug
-    - .base-job
-    - .debug
+  extends: .base-job
 
 robot-service-template:
   variables:
     SERVICE_NAME: "robot-service-template"
-  extends:
-    - .debug
-    - .base-job
-    - .debug
+  extends: .base-job
 
 web-service-template:
   variables:
     SERVICE_NAME: "web-service-template"
-  extends:
-    - .debug
-    - .base-job
-    - .debug
+  extends: .base-job
 
 robot-perception-service:
   variables:
     SERVICE_NAME: "perception"
-  extends:
-    - .debug
-    - .base-job
-    - .debug
+  extends: .base-job
