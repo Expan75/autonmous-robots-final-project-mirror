@@ -59,26 +59,26 @@ flag-leaked-secrets:
     - /analyzer run
 
 docs:
-  extends: .base-job
   variables:
     SERVICE_NAME: "docs"
+  extends: .base-job
 
 ansible:
-  extends: .base-job
   variables:
     SERVICE_NAME: "ansible"
+  extends: .base-job
 
 robot-service-template:
-  extends: .base-job
   variables:
     SERVICE_NAME: "robot-service-template"
+  extends: .base-job
 
 web-service-template:
-  extends: .base-job
   variables:
     SERVICE_NAME: "web-service-template"
+  extends: .base-job
 
 robot-perception-service:
-  extends: .base-job
   variables:
     SERVICE_NAME: "perception"
+  extends: .base-job
