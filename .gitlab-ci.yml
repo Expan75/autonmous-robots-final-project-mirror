@@ -16,8 +16,8 @@ variables:
 .base-job:
   needs: ["flag-leaked-secrets"]
   stage: trigger
-  trigger:
-    include: "$SERVICE_DIRECTORY/.*-ci.yml"
+  include:
+    - local: $SERVICE_DIRECTORY/.*-ci.yml
   rules:
     # triggers a downstream pipeline if >=1 conditions are met of::
     #
