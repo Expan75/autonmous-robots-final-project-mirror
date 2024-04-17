@@ -8,9 +8,30 @@ variables:
   SECRETS_ANALYZER_VERSION: "5"
   SECRET_DETECTION_EXCLUDED_PATHS: ""
 
-  SERVICE_NAME: "overridemeinajobplease"
-  SERVICE_DIRECTORY: "$SERVICE_NAME/**"
-  SERVICE_TAG_PREFIX: "$SERVICE_NAME"
+  SERVICE_NAME: ""
+  SERVICE_DIRECTORY: ""
+  SERVICE_TAG_PREFIX: ""
+
+# base job to be extended by downstream pipelines
+.base-job:
+  needs: ["flag-leaked-secrets"]
+  stage: trigger
+  trigger:
+    include: "$SERVICE_DIRECTORY/.*-ci.yml"
+  rules:
+    # triggers a downstream pipeline if >=1 conditions are met of::
+    #
+    #   1. A new tag is created
+    #   2. A merge request is made with changes for a service
+    #   3. A push to main is made with changes for a service
+    #
+    - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - $SERVICE_DIRECTORY/**
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - $SERVICE_DIRECTORY/**
 
 flag-leaked-secrets:
   stage: scan
@@ -30,26 +51,6 @@ flag-leaked-secrets:
     - if: $CI_COMMIT_BRANCH
   script:
     - /analyzer run
-
-.base-job:
-  needs: ["flag-leaked-secrets"]
-  stage: trigger
-  trigger:
-    include: "$SERVICE_DIRECTORY/*-ci.yml"
-  rules:
-    # triggers a downstream pipeline if >=1 conditions are met of::
-    #
-    #   1. A new tag is created
-    #   2. A merge request is made with changes for a service
-    #   3. A push to main is made with changes for a service
-    #
-    - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - $SERVICE_DIRECTORY
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - $SERVICE_DIRECTORY
 
 docs:
   extends: .base-job
