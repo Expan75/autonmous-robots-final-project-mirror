@@ -16,7 +16,6 @@ variables:
 .base-job:
   needs: ["flag-leaked-secrets"]
   stage: trigger
-  include: "$SERVICE_DIRECTORY/.*-ci.yml"
   rules:
     # triggers a downstream pipeline if >=1 conditions are met of::
     #
@@ -31,6 +30,8 @@ variables:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - "$SERVICE_DIRECTORY/**"
+  trigger:
+    include: "$SERVICE_DIRECTORY/.*-ci.yml"
 
 flag-leaked-secrets:
   stage: scan
