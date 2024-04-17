@@ -2,33 +2,15 @@ stages:
   - scan
   - trigger
 
-# base pipe triggers on every change everywhere
-# We to override this on a case by case basis
 variables:
-  RULES_CHANGES_PATH: "**/*"
-
   SECURE_ANALYZERS_PREFIX: "$CI_TEMPLATE_REGISTRY_HOST/security-products"
   SECRET_DETECTION_IMAGE_SUFFIX: ""
-
   SECRETS_ANALYZER_VERSION: "5"
   SECRET_DETECTION_EXCLUDED_PATHS: ""
 
-.base-rules:
-  rules:
-    # always run for main
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: always
-    # avoid creation of duplicate jobs for pushing to PR
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      when: never
-    - if: $CI_COMMIT_TAG
-      when: never
-    # only way of getting proper handling of glob paths
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - $RULES_CHANGES_PATH
-    - when: manual
-      allow_failure: true
+  SERVICE_NAME: "overridemeinajobplease"
+  SERVICE_DIRECTORY: "$SERVICE_NAME/**"
+  SERVICE_TAG_PREFIX: "$SERVICE_NAME"
 
 flag-leaked-secrets:
   stage: scan
@@ -44,48 +26,48 @@ flag-leaked-secrets:
       secret_detection: gl-secret-detection-report.json
   tags:
     - docker
-  extends: .base-rules
   rules:
     - if: $CI_COMMIT_BRANCH
   script:
     - /analyzer run
 
-docs:
-  extends: .base-rules
+# defaults for all jobs unless otherwise specified
+default:
+  needs: ["scan"]
   stage: trigger
   trigger:
-    include: "docs/.docs-ci.yml"
+    include: "$SERVICE_DIRECTORY/*-ci.yml"
+  rules:
+    # triggers a downstream pipeline if >=1 conditions are met of::
+    #
+    #   1. A new tag is created
+    #   2. A merge request is made with changes for a service
+    #   3. A push to main is made with changes for a service
+    #
+    - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - $SERVICE_DIRECTORY
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - $SERVICE_DIRECTORY
+
+docs:
   variables:
-    RULES_CHANGES_PATH: "docs/**"
+    SERVICE_NAME: "docs"
 
 ansible:
-  stage: trigger
-  extends: .base-rules
-  trigger:
-    include: "ansible/.ansible-ci.yml"
   variables:
-    RULES_CHANGES_PATH: "ansible/**"
+    SERVICE_NAME: "ansible"
 
 robot-service-template:
-  stage: trigger
-  extends: .base-rules
-  trigger:
-    include: "robot-service-template/.robot-service-ci.yml"
   variables:
-    RULES_CHANGES_PATH: "robot-service-template/**"
+    SERVICE_NAME: "robot-service-template"
 
 web-service-template:
-  stage: trigger
-  extends: .base-rules
-  trigger:
-    include: "web-service-template/.web-service-ci.yml"
   variables:
-    RULES_CHANGES_PATH: "web-service-template/**"
+    SERVICE_NAME: "web-service-template"
 
 robot-perception-service:
-  extends: .base-rules
-  stage: trigger
-  trigger:
-    include: "perception/.perception-ci.yml"
   variables:
-    RULES_CHANGES_PATH: "perception/**"
+    SERVICE_NAME: "perception"
