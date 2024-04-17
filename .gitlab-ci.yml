@@ -24,16 +24,15 @@ variables:
     #   3. A push to main is made with changes for a service
     #
     - if: "$CI_COMMIT_TAG =~ '$SERVICE_TAG_PREFIX-v*'"
+    - if: "$CI_PIPELINE_SOURCE == parent_pipeline"
+      changes:
+        - "$SERVICE_DIRECTORY/**"
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
       changes:
         - "$SERVICE_DIRECTORY/**"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - "$SERVICE_DIRECTORY/**"
-
-  trigger:
-    include:
-      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
 
 flag-leaked-secrets:
   stage: scan
@@ -60,12 +59,20 @@ docs:
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
 
+  trigger:
+    include:
+      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
+
 ansible:
   variables:
     SERVICE_NAME: "ansible"
     SERVICE_DIRECTORY: $SERVICE_NAME
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
+
+  trigger:
+    include:
+      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
 
 robot-service-template:
   variables:
@@ -74,6 +81,10 @@ robot-service-template:
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
 
+  trigger:
+    include:
+      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
+
 web-service-template:
   variables:
     SERVICE_NAME: "web-service-template"
@@ -81,9 +92,17 @@ web-service-template:
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
 
+  trigger:
+    include:
+      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
+
 robot-perception-service:
   variables:
     SERVICE_NAME: "perception"
     SERVICE_DIRECTORY: $SERVICE_NAME
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
+
+  trigger:
+    include:
+      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
