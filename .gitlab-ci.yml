@@ -42,10 +42,9 @@ flag-leaked-secrets:
   artifacts:
     reports:
       secret_detection: gl-secret-detection-report.json
-
   tags:
     - docker
-  extends: .secret-scan-rules
+  extends: .base-rules
   rules:
     - if: $CI_COMMIT_BRANCH
   script:
