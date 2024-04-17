@@ -38,7 +38,8 @@ variables:
     - echo SERVICE_TAG_PREFIX=$SERVICE_TAG_PREFIX
 
   trigger:
-    include: "$SERVICE_DIRECTORY/.*-ci.yml
+    include:
+      - local: "$SERVICE_DIRECTORY/.*-ci.yml
 
 flag-leaked-secrets:
   stage: scan
