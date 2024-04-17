@@ -31,9 +31,8 @@ flag-leaked-secrets:
   script:
     - /analyzer run
 
-# defaults for all jobs unless otherwise specified
-default:
-  needs: ["scan"]
+.base-job:
+  needs: ["flag-leaked-secrets"]
   stage: trigger
   trigger:
     include: "$SERVICE_DIRECTORY/*-ci.yml"
@@ -53,21 +52,26 @@ default:
         - $SERVICE_DIRECTORY
 
 docs:
+  extends: .base-job
   variables:
     SERVICE_NAME: "docs"
 
 ansible:
+  extends: .base-job
   variables:
     SERVICE_NAME: "ansible"
 
 robot-service-template:
+  extends: .base-job
   variables:
     SERVICE_NAME: "robot-service-template"
 
 web-service-template:
+  extends: .base-job
   variables:
     SERVICE_NAME: "web-service-template"
 
 robot-perception-service:
+  extends: .base-job
   variables:
     SERVICE_NAME: "perception"
