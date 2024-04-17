@@ -24,9 +24,6 @@ variables:
     #   3. A push to main is made with changes for a service
     #
     - if: "$CI_COMMIT_TAG =~ '$SERVICE_TAG_PREFIX-v*'"
-    - if: "$CI_PIPELINE_SOURCE == parent_pipeline"
-      changes:
-        - "$SERVICE_DIRECTORY/**"
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
       changes:
         - "$SERVICE_DIRECTORY/**"
@@ -106,3 +103,9 @@ robot-perception-service:
   trigger:
     include:
       - local: "$SERVICE_DIRECTORY/.*-ci.yml"
+
+  rules:
+    - if: "$CI_PIPELINE_SOURCE == parent_pipeline"
+    changes:
+      - "$SERVICE_DIRECTORY/**"
+
