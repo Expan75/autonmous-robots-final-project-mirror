@@ -13,7 +13,7 @@ variables:
   SERVICE_TAG_PREFIX: ""
 
 # base job to be extended by downstream pipelines
-.base-job:
+.base:
   needs: ["flag-leaked-secrets"]
   stage: trigger
   rules:
@@ -53,26 +53,37 @@ flag-leaked-secrets:
     - /analyzer run
 
 docs:
+  # need to all be defined here for override to work properly
   variables:
     SERVICE_NAME: "docs"
-  extends: .base-job
+    SERVICE_DIRECTORY: $SERVICE_NAME
+    SERVICE_TAG_PREFIX: $SERVICE_NAME
+  extends: .base
 
 ansible:
   variables:
     SERVICE_NAME: "ansible"
-  extends: .base-job
+    SERVICE_DIRECTORY: $SERVICE_NAME
+    SERVICE_TAG_PREFIX: $SERVICE_NAME
+  extends: .base
 
 robot-service-template:
   variables:
     SERVICE_NAME: "robot-service-template"
-  extends: .base-job
+    SERVICE_DIRECTORY: $SERVICE_NAME
+    SERVICE_TAG_PREFIX: $SERVICE_NAME
+  extends: .base
 
 web-service-template:
   variables:
     SERVICE_NAME: "web-service-template"
-  extends: .base-job
+    SERVICE_DIRECTORY: $SERVICE_NAME
+    SERVICE_TAG_PREFIX: $SERVICE_NAME
+  extends: .base
 
 robot-perception-service:
   variables:
     SERVICE_NAME: "perception"
-  extends: .base-job
+    SERVICE_DIRECTORY: $SERVICE_NAME
+    SERVICE_TAG_PREFIX: $SERVICE_NAME
+  extends: .base
