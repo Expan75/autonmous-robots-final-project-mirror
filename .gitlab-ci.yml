@@ -15,18 +15,15 @@ variables:
 # base job to be extended by downstream pipelines
 .base:
   rules:
-    # trigger downstream pipeline for any push containing changes
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - "$SERVICE_DIRECTORY/**/*"
-    # trigger downstream pipeline if a matching tag is created
-    - if: "$CI_COMMIT_TAG != null && $CI_BUILD_TAG =~ *$SERVICE_TAG_PREFIX*"
+    - if: $CI_BUILD_TAG =~ "*$SERVICE_TAG_PREFIX*" 
+    - if: ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event") 
+    changes:
+      - '$SERVICE_DIRECTORY/**/*'
 
   needs: ["flag-leaked-secrets"]
   stage: trigger
   trigger:
     include: "$SERVICE_DIRECTORY/.*-ci.yml"
-    strategy: depend
 
 flag-leaked-secrets:
   stage: scan
