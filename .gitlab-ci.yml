@@ -1,7 +1,12 @@
 stages:
   - scan
-  - info
   - trigger
+
+default:
+  after_script:
+    - "echo Starting jobs for SERVICE=$SERVICE_NAME"
+    - "echo Reacting to changes in $SERVICE_DIRECTORY"
+    - "echo Releasing all tags matching pattern: $SERVICE_RELEASE_TAG_PATTERN"
 
 variables:
   SECURE_ANALYZERS_PREFIX: "$CI_TEMPLATE_REGISTRY_HOST/security-products"
@@ -40,14 +45,6 @@ flag-secrets:
     - docker
   script:
     - /analyzer run
-
-info:
-  stage: info
-  tags: ["docker-build"]
-  script:
-    - "echo Starting jobs for SERVICE=$SERVICE_NAME"
-    - "echo Reacting to changes in $SERVICE_DIRECTORY"
-    - "echo Releasing all tags matching pattern: $SERVICE_RELEASE_TAG_PATTERN"
 
 docs:
   variables:
