@@ -47,8 +47,6 @@ flag-leaked-secrets:
       secret_detection: gl-secret-detection-report.json
   tags:
     - docker
-  rules:
-    - if: $CI_COMMIT_BRANCH
   script:
     - /analyzer run
 
