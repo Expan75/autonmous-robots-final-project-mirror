@@ -16,11 +16,6 @@ variables:
   # semantic versioning
   VERSION_SUFFIX_PATTERN: "v(\\d+.){1,2}\\d+"
 
-  # overrides for downstream child services
-  SERVICE_NAME: "" # name of service
-  SERVICE_DIRECTORY: "" # root of project directory for service
-  SERVICE_RELEASE_TAG_PATTERN: "" # valid regex pattern matching image tags
-
 .base:
   variables:
     # $$ is not a typo: https://docs.gitlab.com/ee/ci/variables/#expand-cicd-variables
@@ -29,7 +24,9 @@ variables:
   rules:
     # trigger if changes are found in child directory or a new tag was created
     - changes:
-        - "$SERVICE_DIRECTORY/**"
+        paths:
+          - "$SERVICE_DIRECTORY/**"
+        when: always # required for no good reason
     - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN
 
   needs: ["flag-secrets"]
