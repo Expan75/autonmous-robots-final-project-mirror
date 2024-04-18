@@ -24,6 +24,7 @@ variables:
     #   3. A push to main is made with changes for a service
     #
     - if: "$CI_COMMIT_TAG =~ '$SERVICE_TAG_PREFIX-v*'"
+      when: always
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
       changes:
         - "$SERVICE_DIRECTORY/**"
