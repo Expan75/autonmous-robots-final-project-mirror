@@ -1,7 +1,13 @@
 stages:
-  - test"
+  - test
+  - release-components
   - trigger
-  - release
+
+# components don't get published unless a release job is calle...
+release:
+  stage: release-components
+  script:
+    - "echo this supposedly activates components..."
 
 include:
   - component: "git.chalmers.se/erhaka/team11-project-monorepo/templates/trigger@~latest"
@@ -24,9 +30,3 @@ include:
     inputs:
       service_name: "robot-perception-service"
       service_root: "robot-perception-service"
-
-# components don't get published unless a release job is called...
-release:
-  stage: release
-  script:
-    - "echo this supposedly activates components..."
