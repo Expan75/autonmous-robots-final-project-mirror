@@ -1,8 +1,9 @@
 stages:
-  - scan
+  - test
   - trigger
 
 include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
   - local: "templates/Trigger.yml"
     inputs:
       service_name: "docs"
