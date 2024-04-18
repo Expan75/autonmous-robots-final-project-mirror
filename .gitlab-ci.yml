@@ -13,17 +13,22 @@ variables:
   SECRETS_ANALYZER_VERSION: "5"
   SECRET_DETECTION_EXCLUDED_PATHS: ""
 
-# base job to be extended by downstream pipelines
+  # semantic versioning
+  VERSION_SUFFIX_PATTERN: "v(\\d+.){1,2}\\d+"
+
+  # overrides for downstream child services
+  SERVICE_NAME: "" # name of service
+  SERVICE_DIRECTORY: "" # root of project directory for service
+  SERVICE_RELEASE_TAG_PATTERN: "" # valid regex pattern matching image tags
+
 .base:
   variables:
-    VERSION_SUFFIX_PATTERN: "v(\\d+.){1,2}\\d+"
     SERVICE_RELEASE_TAG_PATTERN: "/^$SERVICE_NAME-$VERSION_SUFFIX_PATTERN$/"
 
   rules:
     # trigger if changes are found in child directory or a new tag was created
     - changes:
         - "$SERVICE_DIRECTORY/**"
-        - "$SERVICE_DIRECTORY/**/*"
     - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN
 
   needs: ["flag-secrets"]
