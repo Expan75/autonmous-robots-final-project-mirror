@@ -1,31 +1,25 @@
-# components are great but can only be extracted from the same domain.
-# I.e., we cannot run third-party components if we're not using gitlab-cloud :-(
-variables:
-  COMPONENTS_ROOT: "git.chalmers.se/erhaka/team11-project-monorepo/templates"
-
 stages:
   - "test"
   - "trigger"
 
 include:
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - component: "templates/Trigger@latest"
+  - component: "templates/trigger@latest"
     inputs:
       service_name: "docs"
       service_root: "docs"
-  - component: "$COMPONENTS_ROOT/Trigger@latest"
+  - component: "templates/trigger@latest"
     inputs:
       service_name: "ansible"
       service_root: "ansible"
-  - component: "$COMPONENTS_ROOT/Trigger.yml"
+  - component: "templates/trigger@latest"
     inputs:
       service_name: "web-service-template"
       service_root: "web-service-template"
-  - component: "$COMPONENTS_ROOT/Trigger.yml"
+  - component: "templates/trigger@latest"
     inputs:
       service_name: "robot-service-template"
       service_root: "robot-service-template"
-  - component: "$COMPONENTS_ROOT/Trigger.yml"
+  - component: "templates/trigger@latest"
     inputs:
       service_name: "robot-perception-service"
       service_root: "robot-perception-service"
