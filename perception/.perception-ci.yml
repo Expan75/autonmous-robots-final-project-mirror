@@ -2,7 +2,7 @@ image: docker
 
 variables:
   PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7"
-  RELEASE_TAG_PATTERN: "/^$SERVICE_TAG_PREFIX-v(\d+.){1,2}\d+$/" 
+  RELEASE_TAG_PATTERN: '/^$SERVICE_TAG_PREFIX-v(\d+.){1,2}\d+$/' 
 
 services:
   - name: docker:dind
