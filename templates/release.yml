@@ -12,8 +12,6 @@ spec:
 
     job_prefix:
       default: "trigger"
-    stage:
-      default: "trigger"
 
 ---
 release:
