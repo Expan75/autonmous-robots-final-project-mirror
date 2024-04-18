@@ -55,7 +55,7 @@ docs:
     SERVICE_DIRECTORY: $SERVICE_NAME
 
     # NOTE: don't try to variables like $SERVICE_NAME directly in pattern.
-    SERVICE_RELEASE_TAG_PATTERN: '/^$docs-v(\d+.){1,2}\d+$/'
+    SERVICE_RELEASE_TAG_PATTERN: '/^docs-v(\d+.){1,2}\d+$/'
 
   extends: .base
 
@@ -65,7 +65,7 @@ ansible:
     SERVICE_DIRECTORY: $SERVICE_NAME
 
     # NOTE: don't try to variables like $SERVICE_NAME directly in pattern.
-    SERVICE_RELEASE_TAG_PATTERN: '/^$ansible-v(\d+.){1,2}\d+$/'
+    SERVICE_RELEASE_TAG_PATTERN: '/^ansible-v(\d+.){1,2}\d+$/'
 
   extends: .base
 
@@ -76,7 +76,7 @@ robot-service-template:
     SERVICE_TAG_PREFIX: $SERVICE_NAME
 
     # NOTE: don't try to variables like $SERVICE_NAME directly in pattern.
-    SERVICE_RELEASE_TAG_PATTERN: '/^$robot-service-template-v(\d+.){1,2}\d+$/'
+    SERVICE_RELEASE_TAG_PATTERN: '/^robot-service-template-v(\d+.){1,2}\d+$/'
 
   extends: .base
 
@@ -87,7 +87,7 @@ web-service-template:
     SERVICE_TAG_PREFIX: $SERVICE_NAME
 
     # NOTE: don't try to variables $SERVICE_NAME directly in pattern.
-    SERVICE_RELEASE_TAG_PATTERN: '/^$web-service-template-v(\d+.){1,2}\d+$/'
+    SERVICE_RELEASE_TAG_PATTERN: '/^web-service-template-v(\d+.){1,2}\d+$/'
 
   extends: .base
 
@@ -97,6 +97,6 @@ robot-perception-service:
     SERVICE_DIRECTORY: "perception"
 
     # NOTE: don't try to variables $SERVICE_NAME directly in pattern.
-    SERVICE_RELEASE_TAG_PATTERN: '/^$robot-perception-service-v(\d+.){1,2}\d+$/'
+    SERVICE_RELEASE_TAG_PATTERN: '/^robot-perception-service-v(\d+.){1,2}\d+$/'
 
   extends: .base
