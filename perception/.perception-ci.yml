@@ -2,28 +2,31 @@ image: docker
 
 variables:
   PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7"
+  RELEASE_TAG_PATTERN: "/^$SERVICE_TAG_PREFIX-v(\d+.){1,2}\d+$/" 
 
 services:
   - name: docker:dind
 
 before_script:
-  - cd perception
+  - echo "Starting jobs for SERVICE=$SERVICE_NAME"
+  - echo "Reacting to changes in $SERVICE_DIRECTORY"
+  - echo "Releasing all versioned tags matching prefix: '$SERVICE_TAG_PREFIX'" 
+  - cd $SERVICE_DIRECTORY
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 stages:
   - build
   - release
 
-build-amd64:
+build:
   tags: ["docker-build"]
   stage: build
   script:
     - docker build .
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-push:
+release:
   tags: ["docker-build"]
+  needs: ["build"]
   stage: release
   script:
     - docker run --privileged --rm tonistiigi/binfmt --install all
@@ -31,7 +34,4 @@ push:
     - docker buildx create builder --use
     - docker buildx build --platform "$PLATFORMS" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
   rules:
-    # interpolation insdie regex strings are not supported in gitlab
-    # we force all tags to prepend the service name and suffix versions
-    # with a valid semantic version; see https://semver.org/ for more info
-    - if: $CI_COMMIT_TAG =~ /^perception-v(\d+.){1,2}\d+$/
+    - if: $CI_COMMIT_TAG =~ $RELEASE_TAG_PATTERN
