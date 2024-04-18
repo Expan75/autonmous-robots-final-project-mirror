@@ -1,6 +1,8 @@
 stages:
-  - test
   - trigger
+
+workflow:
+  when: always
 
 include:
   - local: "templates/trigger.yml"
