@@ -16,7 +16,7 @@ spec:
       default: "trigger"
 
 ---
-"$[[ inputs.job_prefix ]]-$[[ inputs.service_name ]]":
+release:
   stage: "[[ $inputs.stage ]]"
   tags: ["docker-build"]
   stage: release
