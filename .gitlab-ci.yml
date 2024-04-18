@@ -15,10 +15,10 @@ variables:
 # base job to be extended by downstream pipelines
 .base:
   rules:
-    - if: $CI_BUILD_TAG =~ "*$SERVICE_TAG_PREFIX*" 
-    - if: ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event") 
-    changes:
-      - '$SERVICE_DIRECTORY/**/*'
+    - if: "$CI_BUILD_TAG =~ '*$SERVICE_TAG_PREFIX*'"
+    - if: "($CI_PIPELINE_SOURCE == 'push' || $CI_PIPELINE_SOURCE == 'merge_request_event')"
+      changes:
+        - "$SERVICE_DIRECTORY/**/*"
 
   needs: ["flag-leaked-secrets"]
   stage: trigger
