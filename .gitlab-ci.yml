@@ -15,7 +15,7 @@ include:
     inputs:
       service_name: "web-service-template"
       service_root: "web-service-template"
-  - local: "trigger/trigger.yml"
+  - local: "templates/trigger.yml"
     inputs:
       service_name: "robot-service-template"
       service_root: "robot-service-template"
