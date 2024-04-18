@@ -12,8 +12,8 @@ variables:
 # base job to be extended by downstream pipelines
 .base:
   variables:
-    VERSION_SUFFIX_PATTERN: "v(\d+.){1,2}\d+"
-    SERVICE_RELEASE_TAG_PATTERN: "/^$SERVICE_NAME-$VERSION_SUFFIX_PATTERN$/"        
+    VERSION_SUFFIX_PATTERN: "v(\\d+.){1,2}\\d+"
+    SERVICE_RELEASE_TAG_PATTERN: "/^$SERVICE_NAME-$VERSION_SUFFIX_PATTERN$/"
 
   rules:
     # trigger if changes are found in child directory or a new tag was created
@@ -25,7 +25,6 @@ variables:
   stage: trigger
   trigger:
     include: "$SERVICE_DIRECTORY/.*-ci.yml"
-
 
 flag-secrets:
   stage: scan
