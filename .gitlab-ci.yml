@@ -1,32 +1,25 @@
 stages:
   - test
-  - release-components
   - trigger
 
-# components don't get published unless a release job is calle...
-release:
-  stage: release-components
-  script:
-    - "echo this supposedly activates components..."
-
 include:
-  - component: "git.chalmers.se/erhaka/team11-project-monorepo/templates/trigger@~latest"
+  - local: "trigger.yml"
     inputs:
       service_name: "docs"
       service_root: "docs"
-  - component: "templates/trigger"
+  - local: "trigger"
     inputs:
       service_name: "ansible"
       service_root: "ansible"
-  - component: "templates/trigger"
+  - local: "trigger"
     inputs:
       service_name: "web-service-template"
       service_root: "web-service-template"
-  - component: "templates/trigger"
+  - local: "trigger"
     inputs:
       service_name: "robot-service-template"
       service_root: "robot-service-template"
-  - component: "templates/trigger"
+  - local: "trigger"
     inputs:
       service_name: "robot-perception-service"
       service_root: "robot-perception-service"
