@@ -5,10 +5,8 @@ stages:
 # defaults mainly for debugging vars get set correctly; runs after every job
 default:
   after_script:
-    - "echo tags matching pattern: $CI_COMMIT_TAG"
-    - "echo Starting jobs for SERVICE=$SERVICE_NAME"
-    - "echo Reacting to changes in $SERVICE_DIRECTORY"
-    - "echo tags matching pattern: $SERVICE_RELEASE_TAG_PATTERN"
+    - printenv
+
 variables:
   SECURE_ANALYZERS_PREFIX: "$CI_TEMPLATE_REGISTRY_HOST/security-products"
   SECRET_DETECTION_IMAGE_SUFFIX: ""
