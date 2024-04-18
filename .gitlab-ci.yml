@@ -12,14 +12,24 @@ variables:
   SERVICE_DIRECTORY: ""
   SERVICE_TAG_PREFIX: ""
 
+# snippet that avoids doubled pipelines when creating PRs
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: never
+    - when: always
+
 # base job to be extended by downstream pipelines
 .base:
+  variables:
+    SERVICE_TAG_PATTERN = '/^$SERVICE_TAG_PREFIX-.*/'
   rules:
     # trigger if changes are found in child directory
     - changes:
         - "$SERVICE_DIRECTORY/**/*"
     # trigger if a tag is created for child service
-    - if: "$CI_COMMIT_TAG =~ '$SERVICE_TAG_PREFIX*'"
+    # Note that the interpolation cannot be done directly in regex (gitlab bug feature)
+    - if: "$CI_COMMIT_TAG =~ $SERVICE_TAG_PATTERN 
 
   needs: ["flag-leaked-secrets"]
   stage: trigger
