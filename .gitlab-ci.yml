@@ -18,7 +18,9 @@ variables:
     - if: "$CI_BUILD_TAG =~ '*$SERVICE_TAG_PREFIX*'"
     - if: "($CI_PIPELINE_SOURCE == 'push' || $CI_PIPELINE_SOURCE == 'merge_request_event')"
       changes:
-        - "$SERVICE_DIRECTORY/**/*"
+        paths:
+          - "$SERVICE_DIRECTORY/**/*"
+        compare_to: "refs/heads/main"
 
   needs: ["flag-leaked-secrets"]
   stage: trigger
