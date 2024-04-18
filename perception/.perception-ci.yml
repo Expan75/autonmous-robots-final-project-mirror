@@ -17,16 +17,16 @@ before_script:
   - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
 
 info:
-  stage: info
   tags: ["docker-build"]
+  stage: info
   script:
     - "echo Starting jobs for SERVICE=$SERVICE_NAME"
     - "echo Reacting to changes in $SERVICE_DIRECTORY"
     - "echo Releasing all versioned tags matching prefix: $SERVICE_TAG_PREFIX"
 
 build:
-  needs: ["info"]
   tags: ["docker-build"]
+  needs: ["info"]
   stage: build
   script:
     - docker build .

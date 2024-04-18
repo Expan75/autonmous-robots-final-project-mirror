@@ -25,15 +25,15 @@ info:
     - "echo Releasing all versioned tags matching prefix: $SERVICE_TAG_PREFIX"
 
 build:
-  needs: ["info"]
   tags: ["docker-build"]
+  needs: ["info"]
   stage: build
   script:
     - docker build .
 
 release:
-  needs: ["build"]
   tags: ["docker-build"]
+  needs: ["build"]
   stage: release
   script:
     - docker run --privileged --rm tonistiigi/binfmt --install all
