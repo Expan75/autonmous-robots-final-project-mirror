@@ -1,5 +1,6 @@
 stages:
   - scan
+  - info
   - trigger
 
 variables:
@@ -13,13 +14,6 @@ variables:
   SERVICE_DIRECTORY: "" # root of project directory for service
   SERVICE_RELEASE_TAG_PATTERN: "" # valid regex pattern matching image tags
 
-# snippet that avoids doubled pipelines when creating PRs
-workflow:
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: never
-    - when: always
-
 # base job to be extended by downstream pipelines
 .base:
   rules:
@@ -29,7 +23,7 @@ workflow:
     # trigger for any new tag matching service defined release pattern
     - if: "$CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN"
 
-  needs: ["flag-leaked-secrets"]
+  needs: ["flag-leaked-secrets", "info"]
   stage: trigger
   trigger:
     include: "$SERVICE_DIRECTORY/.*-ci.yml"
@@ -48,6 +42,14 @@ flag-leaked-secrets:
     - docker
   script:
     - /analyzer run
+
+info:
+  stage: info
+  tags: ["docker-build"]
+  script:
+    - "echo Starting jobs for SERVICE=$SERVICE_NAME"
+    - "echo Reacting to changes in $SERVICE_DIRECTORY"
+    - "echo Releasing all tags matching pattern: $SERVICE_RELEASE_TAG_PATTERN"
 
 docs:
   variables:
