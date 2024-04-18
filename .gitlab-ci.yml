@@ -1,7 +1,7 @@
 # components are great but can only be extracted from the same domain.
 # I.e., we cannot run third-party components if we're not using gitlab-cloud :-(
 variables:
-  COMPONENTS_ROOT: "https://git.chalmers.se/erhaka/team11-project-monorepo/templates"
+  COMPONENTS_ROOT: "git.chalmers.se/erhaka/team11-project-monorepo/templates"
 
 stages:
   - "test"
