@@ -1,19 +1,19 @@
+stages:
+  - build
+  - release
+
+variables:
+  SERVICE_NAME: docs
+  SERVICE_DIRECTORY: $SERVICE_NAME
+
 workflow:
   auto_cancel:
     on_job_failure: all
   rules:
     - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
 
-variables:
-  SERVICE_NAME: docs
-  SERVICE_DIRECTORY: $SERVICE_NAME
-
 before_script:
   - cd $SERVICE_DIRECTORY
-
-stages:
-  - build
-  - release
 
 build:
   stage: build

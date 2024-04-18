@@ -32,8 +32,8 @@ variables:
         - "$SERVICE_DIRECTORY/**"
 
   trigger:
-    include:
-      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
+    include: "$SERVICE_DIRECTORY/.*-ci.yml"
+    strategy: depend
 
 flag-leaked-secrets:
   stage: scan
