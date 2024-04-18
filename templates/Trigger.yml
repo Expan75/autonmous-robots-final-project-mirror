@@ -1,0 +1,27 @@
+# Gitlab component for triggering and delegating to a child pipeline
+spec:
+  inputs:
+    service_name:
+    service_root:
+
+    job_prefix:
+      default: "trigger"
+    stage:
+      default: "trigger"
+
+    version_pattern:
+      default: "v(\\d+.){1,2}\\d+"
+---
+"$[[ inputs.job_prefix ]]-$[[ inputs.service_name ]]":
+  stage: "[[ $inputs.stage ]]"
+  variables:
+    RELEASE_TAG_PATTERN: "/^[[ $inputs.service_name ]]-[[ $inputs.version_pattern ]]$$/"
+
+  rules:
+    # trigger if changes are found in child directory or a new tag was created
+    - changes:
+        - "$[[ inputs.service_root ]]/**"
+    - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN
+
+  trigger:
+    include: "[[ $inputs.service_root ]]/.*-ci.yml"

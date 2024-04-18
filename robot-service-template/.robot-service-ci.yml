@@ -1,9 +1,5 @@
 image: docker
 
-variables:
-  PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7"
-  RELEASE_TAG_PATTERN: '/^$SERVICE_TAG_PREFIX-v(\d+.){1,2}\d+$/'
-
 services:
   - name: docker:dind
 
@@ -11,24 +7,15 @@ stages:
   - build
   - release
 
-before_script:
-  - "cd $SERVICE_DIRECTORY"
-  - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
-
 build:
   tags: ["docker-build"]
   stage: build
   script:
     - docker build .
 
-release:
-  tags: ["docker-build"]
-  needs: ["build"]
-  stage: release
-  script:
-    - docker run --privileged --rm tonistiigi/binfmt --install all
-    - docker context create builder
-    - docker buildx create builder --use
-    - docker buildx build --platform "$PLATFORMS" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
-  rules:
-    - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN
+include:
+  - local: "templates/Release.yml"
+    inputs:
+      service_name: "robot-service-template"
+      service_root: "robot-service-template"
+      platforms: "linux/amd64,linux/arm64,linux/arm/v7"
