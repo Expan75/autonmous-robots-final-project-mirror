@@ -1,6 +1,6 @@
 stages:
-  - test
-  - trigger
+  - "test"
+  - "trigger"
 
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml

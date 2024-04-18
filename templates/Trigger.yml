@@ -3,7 +3,6 @@ spec:
   inputs:
     service_name:
     service_root:
-
     job_prefix:
       default: "trigger"
     stage:
@@ -12,7 +11,7 @@ spec:
     version_pattern:
       default: "v(\\d+.){1,2}\\d+"
 ---
-"$[[ inputs.job_prefix ]]-$[[ inputs.service_name ]]":
+"$[[ inputs.job_prefix ]]_$[[ inputs.service_name ]]":
   stage: "[[ $inputs.stage ]]"
   variables:
     RELEASE_TAG_PATTERN: "/^[[ $inputs.service_name ]]-[[ $inputs.version_pattern ]]$$/"
