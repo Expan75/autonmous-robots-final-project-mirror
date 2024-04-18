@@ -12,16 +12,20 @@ stages:
   - build
   - release
 
+before_script:
+  - "cd $SERVICE_DIRECTORY"
+  - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+
 info:
   stage: info
+  tags: ["docker-build"]
   script:
     - "echo Starting jobs for SERVICE=$SERVICE_NAME"
     - "echo Reacting to changes in $SERVICE_DIRECTORY"
     - "echo Releasing all versioned tags matching prefix: $SERVICE_TAG_PREFIX"
-    - "cd $SERVICE_DIRECTORY"
-    - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
 
 build:
+  needs: ["info"]
   tags: ["docker-build"]
   stage: build
   script:
