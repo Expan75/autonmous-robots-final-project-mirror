@@ -1,16 +1,22 @@
 before_script:
   - cd docs
 
+.base:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+
 stages:
   - build
   - release
 
 build:
+  extends: .base
   stage: build
   script:
     - echo "building docs"
 
 release:
+  extends: .base
   stage: release
   script:
     - echo "Deploying updates docs to github pages"
