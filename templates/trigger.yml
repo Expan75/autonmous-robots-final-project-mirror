@@ -6,10 +6,9 @@ spec:
     version_pattern:
       default: "v(\\d+.){1,2}\\d+"
 ---
-trigger:
+"trigger-[[ $inputs.service_name ]]":
   variables:
     RELEASE_TAG_PATTERN: "/^[[ $inputs.service_name ]]-[[ $inputs.version_pattern ]]$$/"
-
   rules:
     # trigger if changes are found in child directory or a new tag was created
     - changes:

@@ -3,23 +3,23 @@ stages:
   - trigger
 
 include:
-  - local: "trigger.yml"
+  - local: "templates/trigger.yml"
     inputs:
       service_name: "docs"
       service_root: "docs"
-  - local: "trigger"
+  - local: "templates/trigger.yml"
     inputs:
       service_name: "ansible"
       service_root: "ansible"
-  - local: "trigger"
+  - local: "templates/trigger.yml"
     inputs:
       service_name: "web-service-template"
       service_root: "web-service-template"
-  - local: "trigger"
+  - local: "trigger/trigger.yml"
     inputs:
       service_name: "robot-service-template"
       service_root: "robot-service-template"
-  - local: "trigger"
+  - local: "templates/trigger.yml"
     inputs:
       service_name: "robot-perception-service"
       service_root: "robot-perception-service"

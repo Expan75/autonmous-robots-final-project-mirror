@@ -3,21 +3,17 @@ spec:
   inputs:
     service_name:
     service_root:
+
     version_pattern:
       default: "v(\\d+.){1,2}\\d+"
-    
+
     platforms:
       default:
         - "linux/amd64,linux/arm64,linux/arm/v7"
 
-    job_prefix:
-      default: "trigger"
-
 ---
-release:
-  stage: "[[ $inputs.stage ]]"
+"release-[[ $inputs.service_name ]]":
   tags: ["docker-build"]
-  stage: release
   variables:
     RELEASE_TAG_PATTERN: "/^[[ $inputs.service_name ]]-[[ $inputs.version_pattern ]]$$/"
   rules:
