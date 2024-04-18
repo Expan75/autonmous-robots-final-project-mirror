@@ -9,11 +9,11 @@ stages:
 
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - component:
+  - component: "templates/Trigger@latest"
     inputs:
       service_name: "docs"
       service_root: "docs"
-  - component: "$COMPONENTS_ROOT/Trigger.yml"
+  - component: "$COMPONENTS_ROOT/Trigger@latest"
     inputs:
       service_name: "ansible"
       service_root: "ansible"
