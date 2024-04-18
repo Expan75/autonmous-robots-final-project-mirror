@@ -2,13 +2,8 @@ stages:
   - scan
   - trigger
 
-flag-leaked-secrets:
-  stage: scan
-  include:
-    - template: Jobs/Secret-Detection.gitlab-ci.yml
-  allow_failure: false
-
 include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
   - local: "templates/Trigger.yml"
     inputs:
       service_name: "docs"
