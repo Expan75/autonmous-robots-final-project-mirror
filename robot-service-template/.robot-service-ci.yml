@@ -10,7 +10,7 @@ before_script:
   - cd robot-service-template
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
-.base
+.base:
   tags: ["docker-build"]
   rules:
     - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
