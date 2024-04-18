@@ -2,6 +2,7 @@ stages:
   - scan
   - trigger
 
+# defaults mainly for debugging vars get set correctly; runs after every job
 default:
   after_script:
     - "echo Starting jobs for SERVICE=$SERVICE_NAME"
@@ -26,7 +27,7 @@ variables:
     #    - "$SERVICE_DIRECTORY/**/*"
     - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN
 
-  needs: ["flag-secrets", "info"]
+  needs: ["flag-secrets"]
   stage: trigger
   trigger:
     include: "$SERVICE_DIRECTORY/.*-ci.yml"
