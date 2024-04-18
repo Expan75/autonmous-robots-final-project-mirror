@@ -1,22 +1,26 @@
-before_script:
-  - cd docs
-
-.base:
+workflow:
+  auto_cancel:
+    on_job_failure: all
   rules:
     - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+
+variables:
+  SERVICE_NAME: docs
+  SERVICE_DIRECTORY: $SERVICE_NAME
+
+before_script:
+  - cd $SERVICE_DIRECTORY
 
 stages:
   - build
   - release
 
 build:
-  extends: .base
   stage: build
   script:
-    - echo "building docs"
+    - echo "building $SERVICE_NAME"
 
 release:
-  extends: .base
   stage: release
   script:
-    - echo "Deploying updates docs to github pages"
+    - echo "releasing $SERVICE_NAME"
