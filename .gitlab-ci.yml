@@ -31,6 +31,10 @@ variables:
       changes:
         - "$SERVICE_DIRECTORY/**"
 
+  trigger:
+    include:
+      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
+
 flag-leaked-secrets:
   stage: scan
   image: "$SECURE_ANALYZERS_PREFIX/secrets:$SECRETS_ANALYZER_VERSION$SECRET_DETECTION_IMAGE_SUFFIX"
@@ -49,16 +53,11 @@ flag-leaked-secrets:
     - /analyzer run
 
 docs:
-  # need to all be defined here for override to work properly
   variables:
     SERVICE_NAME: "docs"
     SERVICE_DIRECTORY: $SERVICE_NAME
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
-
-  trigger:
-    include:
-      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
 
 ansible:
   variables:
@@ -67,20 +66,12 @@ ansible:
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
 
-  trigger:
-    include:
-      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
-
 robot-service-template:
   variables:
     SERVICE_NAME: "robot-service-template"
     SERVICE_DIRECTORY: $SERVICE_NAME
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
-
-  trigger:
-    include:
-      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
 
 web-service-template:
   variables:
@@ -89,23 +80,9 @@ web-service-template:
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
 
-  trigger:
-    include:
-      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
-
 robot-perception-service:
   variables:
     SERVICE_NAME: "perception"
     SERVICE_DIRECTORY: $SERVICE_NAME
     SERVICE_TAG_PREFIX: $SERVICE_NAME
   extends: .base
-
-  trigger:
-    include:
-      - local: "$SERVICE_DIRECTORY/.*-ci.yml"
-
-  rules:
-    - if: "$CI_PIPELINE_SOURCE == parent_pipeline"
-    changes:
-      - "$SERVICE_DIRECTORY/**"
-

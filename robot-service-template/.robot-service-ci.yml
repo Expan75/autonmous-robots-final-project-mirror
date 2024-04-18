@@ -21,13 +21,9 @@ stages:
 
 build-amd64:
   extends: .base
-  rules:
-  - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
   stage: build
   script:
     - docker build .
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
 
 push:
   extends: .base
@@ -38,4 +34,4 @@ push:
     - docker run --privileged --rm tonistiigi/binfmt --install all
     - docker context create builder
     - docker buildx create builder --use
-    - docker buildx build --platform "$PLATFORMS" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
+    - docker buildx build --platform "$PLATFORMS" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push
