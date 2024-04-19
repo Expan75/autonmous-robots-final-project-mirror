@@ -1,11 +1,11 @@
-stages:
-  - scan
-  - trigger # all pipes need test
-
-image: docker:latest
+image: docker
 
 services:
   - docker:dind
+
+stages:
+  - scan
+  - trigger
 
 scan:
   stage: scan

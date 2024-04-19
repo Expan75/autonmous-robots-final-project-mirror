@@ -11,6 +11,7 @@ spec:
         - "linux/amd64,linux/arm64,linux/arm/v7"
 ---
 "release-[[ $inputs.service_name ]]":
+  stage: release
   tags: ["docker-build"]
   variables:
     RELEASE_TAG_PATTERN: "/^[[ $inputs.service_name ]]-[[ $inputs.version_pattern ]]$$/"
