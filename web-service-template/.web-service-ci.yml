@@ -1,9 +1,5 @@
 image: docker
 
-test:
-  script:
-    - echo "Hello Gitlab-Runner"
-
 services:
   - name: docker:dind
 

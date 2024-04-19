@@ -1,6 +1,10 @@
 stages:
-  - trigger
-  - test # all pipes need test
+  - scan
+  - trigger # all pipes need test
+
+scan:
+  stage: scan
+  script: "echo 'scanning...'"
 
 include:
   - local: "templates/trigger.yml"
@@ -23,7 +27,3 @@ include:
     inputs:
       service_name: "robot-perception-service"
       service_root: "robot-perception-service"
-
-test:
-  stage: test
-  script: "echo 'hello, world!"
