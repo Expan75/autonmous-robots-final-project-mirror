@@ -27,8 +27,8 @@ include:
       service_root: "robot-service-template"
   - local: "templates/trigger.yml"
     inputs:
-      service_name: "web-service-template"
-      service_root: "web-service-template"
+      service_name: "cloud-service-template"
+      service_root: "cloud-service-template"
 
 # override secret detection so stage is "scan"
 secret_detection:

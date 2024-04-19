@@ -14,8 +14,8 @@ build:
     - docker build .
 
 include:
-  - local: "templates/release.yml"
+  - local: "templates/robot/release.yml"
     inputs:
-      service_name: "robot-service-template"
-      service_root: "robot-service-template"
+      service_name: "robot-perception-service"
+      service_root: "robot-perception-service"
       platforms: "linux/amd64,linux/arm64,linux/arm/v7"

@@ -1,0 +1,19 @@
+image: docker
+
+services:
+  - name: docker:dind
+
+stages:
+  - build
+  - release
+
+build:
+  tags: ["docker-build"]
+  stage: build
+  script:
+    - "echo 'building cloud service...'"
+
+release:
+  tags: ["docker-build"]
+  script:
+    - "echo 'releasing cloud service'"
