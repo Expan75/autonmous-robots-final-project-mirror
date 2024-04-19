@@ -15,7 +15,7 @@ spec:
     RELEASE_TAG_PATTERN: "/^$[[ inputs.service_name ]]-$[[ inputs.version_pattern ]]$$/"
   rules:
     # trigger if tag matches release pattern or on service changes
-    - if: $CI_COMMIT_TAG =~ $RELEASE_TAG_PATTERN
+    - if: "$CI_COMMIT_TAG && $CI_COMMIT_TAG =~ $RELEASE_TAG_PATTERN"
     - changes:
         - "$[[ inputs.service_root ]]/**"
 
