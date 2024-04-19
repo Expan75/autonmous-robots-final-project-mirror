@@ -7,6 +7,9 @@ stages:
   - scan
   - trigger
 
+before_script:
+  - printenv
+
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
   - local: "templates/trigger.yml"

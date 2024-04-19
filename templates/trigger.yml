@@ -6,7 +6,13 @@ spec:
     version_pattern:
       default: "v(\\d+.){1,2}\\d+"
 ---
+"info-$[[ inputs.service_name ]]":
+  stage: trigger
+  script:
+    - printenv
+
 "trigger-$[[ inputs.service_name ]]":
+  needs: ["info-$[[ inputs.service_name ]]"]
   stage: trigger
   # redeclare such that childs have access
   variables:
