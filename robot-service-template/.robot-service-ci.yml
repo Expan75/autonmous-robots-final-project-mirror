@@ -9,7 +9,6 @@ stages:
 
 before_script:
   - printenv
-  - cd $SERVICE_ROOT
 
 build:
   tags: ["docker-build"]
