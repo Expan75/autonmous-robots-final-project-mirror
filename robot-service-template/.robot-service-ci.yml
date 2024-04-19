@@ -1,24 +1,5 @@
-image: docker
-
-services:
-  - name: docker:dind
-
-stages:
-  - build
-  - release
-
-before_script:
-  - printenv
-
-build:
-  tags: ["docker-build"]
-  stage: build
-  script:
-    - docker build .
-
 include:
-  - local: "templates/robot/release.yml"
+  - local: "templates/robot-service-pipeline.yml"
     inputs:
-      service_name: "robot-service-template"
-      service_root: "robot-service-template"
+      service: robot-service-template
       platforms: "linux/amd64,linux/arm64,linux/arm/v7"

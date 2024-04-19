@@ -1,39 +1,33 @@
 # Gitlab component for triggering and delegating to a child pipeline
 spec:
   inputs:
-    service_name:
-    service_root:
-    version_pattern:
-      default: "v(\\d+.){1,2}\\d+"
+    service:
 ---
 variables:
-  SERVICE_NAME: "$[[ inputs.service_name ]]"
-  SERVICE_ROOT: "$[[ inputs.service_root ]]"
-  RELEASE_TAG_PATTERN: "/^$[[ inputs.service_name ]]-$[[ inputs.version_pattern ]]$$/"
+  RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
 
-# duplication of variables required for them to be included alongside
-# both trigger + printenv script, AND to be passed down to child.
-"info-$[[ inputs.service_name ]]":
-  stage: trigger
-  script:
-    - printenv
+before_script:
+  - printenv
 
-"trigger-$[[ inputs.service_name ]]-2/2":
-
-
-"trigger-$[[ inputs.service_name ]]-2/2":
-  needs: ["info-$[[ inputs.service_name ]]"]
+"trigger-$[[ inputs.service ]]":
+  needs: ["info-$[[ inputs.service ]]"]
   stage: trigger
   rules:
-    # trigger if tag matches release pattern or on service changes
-    - if: "$CI_COMMIT_TAG =~ $RELEASE_TAG_PATTERN"
-    # less readable but necssary for changes to not trigger on everything
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # trigger if a merge request is made containing changes for the service
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         paths:
-          - "$[[ inputs.service_root ]]/**"
-        compare_to: "refs/heads/$CI_DEFAULT_BRANCH"
+          - "$[[ inputs.service ]]/**"
+
+    # trigger on all pushes to main containing changes but NOT tags
+    - if: '$CI_PIPELINE_SOURCE == "push" && CI_COMMIT_TAG == null'
+      changes:
+        paths:
+          - "$[[ inputs.service ]]/**"
+
+    # trigger if tag is created that matches the release pattern.
+    - if: "$CI_COMMIT_TAG != null && $CI_COMMIT_TAG =~ $RELEASE_TAG_PATTERN"
 
   trigger:
-    include: "$[[ inputs.service_root ]]/.*-ci.yml"
+    include: "$[[ inputs.service ]]/.*-ci.yml"
     strategy: depend

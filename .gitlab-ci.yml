@@ -10,28 +10,31 @@ stages:
 before_script:
   - printenv
 
+variables:
+  VERSION_PATTERN: "v(\\d+.){1,2}\\d+"
+
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
+
   - local: "templates/trigger.yml"
     inputs:
-      service_name: "ansible"
-      service_root: "ansible"
+      service: "ansible"
+
   - local: "templates/trigger.yml"
     inputs:
-      service_name: "docs"
-      service_root: "docs"
+      service: "docs"
+
   - local: "templates/trigger.yml"
     inputs:
-      service_name: "robot-perception-service"
-      service_root: "robot-perception-service"
+      service: "robot-perception-service"
+
   - local: "templates/trigger.yml"
     inputs:
-      service_name: "robot-service-template"
-      service_root: "robot-service-template"
+      service: "robot-service-template"
+
   - local: "templates/trigger.yml"
     inputs:
-      service_name: "cloud-service-template"
-      service_root: "cloud-service-template"
+      service: "cloud-service-template"
 
 # override secret detection so stage is "scan"
 secret_detection:

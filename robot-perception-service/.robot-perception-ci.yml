@@ -1,24 +1,5 @@
-image: docker
-
-services:
-  - name: docker:dind
-
-stages:
-  - build
-  - release
-
-before_script:
-  - cd $SERVICE_ROOT
-
-build:
-  tags: ["docker-build"]
-  stage: build
-  script:
-    - docker build .
-
 include:
-  - local: "templates/robot/release.yml"
+  - local: "templates/robot-service-pipeline.yml"
     inputs:
-      service_name: "robot-perception-service"
-      service_root: "robot-perception-service"
+      service: robot-perception-service
       platforms: "linux/amd64,linux/arm64,linux/arm/v7"
