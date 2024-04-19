@@ -3,6 +3,10 @@ image: docker
 services:
   - name: docker:dind
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+
 stages:
   - build
   - release

@@ -1,6 +1,10 @@
 before_script:
   - cd ansible
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+
 stages:
   - lint
   - test
