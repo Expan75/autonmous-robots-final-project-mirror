@@ -1,5 +1,9 @@
 image: docker
 
+workflow:
+  auto_cancel:
+    on_job_failure: all
+
 services:
   - docker:dind
 
