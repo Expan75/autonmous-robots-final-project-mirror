@@ -10,17 +10,17 @@ spec:
       default:
         - "linux/amd64,linux/arm64,linux/arm/v7"
 ---
-"release-[[ $inputs.service_name ]]":
+"release-$[[ inputs.service_name ]]":
   stage: release
   tags: ["docker-build"]
   variables:
-    RELEASE_TAG_PATTERN: "/^[[ $inputs.service_name ]]-[[ $inputs.version_pattern ]]$$/"
+    RELEASE_TAG_PATTERN: "/^$[[ inputs.service_name ]]-$[[ inputs.version_pattern ]]$$/"
   rules:
     - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN
   script:
-    - cd "[[ $inputs.service_root ]]"
+    - cd "$[[ inputs.service_root ]]"
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - docker run --privileged --rm tonistiigi/binfmt --install all
     - docker context create builder
     - docker buildx create builder --use
-    - docker buildx build --platform "[[ $inputs.platforms ]]" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
+    - docker buildx build --platform "$[[ inputs.platforms ]]" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
