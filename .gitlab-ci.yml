@@ -2,6 +2,11 @@ stages:
   - scan
   - trigger # all pipes need test
 
+image: docker:latest
+
+services:
+  - docker:dind
+
 scan:
   stage: scan
   script: "echo 'scanning...'"
