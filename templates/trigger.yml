@@ -8,7 +8,10 @@ spec:
 ---
 "trigger-$[[ inputs.service_name ]]":
   stage: trigger
+  # redeclare such that childs have access
   variables:
+    SERVICE_NAME: "$[[ inputs.service_name ]]"
+    SERVICE_ROOT: "$[[ inputs.service_root ]]"
     RELEASE_TAG_PATTERN: "/^$[[ inputs.service_name ]]-$[[ inputs.version_pattern ]]$$/"
   rules:
     # trigger if tag matches release pattern or on service changes

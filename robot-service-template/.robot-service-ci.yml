@@ -7,6 +7,9 @@ stages:
   - build
   - release
 
+before_script:
+  - cd $SERVICE_ROOT
+
 build:
   tags: ["docker-build"]
   stage: build

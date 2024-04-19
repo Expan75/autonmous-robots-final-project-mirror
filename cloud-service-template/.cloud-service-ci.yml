@@ -3,6 +3,9 @@ image: docker
 services:
   - name: docker:dind
 
+before_script:
+  - cd $SERVICE_ROOT
+
 stages:
   - build
   - release
