@@ -17,5 +17,5 @@ spec:
         - "$[[ inputs.service_root ]]/**"
 
   trigger:
-    include: "[[ $inputs.service_root ]]/.*-ci.yml"
+    include: "$[[ inputs.service_root ]]/.*-ci.yml"
     strategy: depend
