@@ -13,6 +13,6 @@ scan:
 
 include:
   - local: "templates/trigger.yml"
-      inputs:
-        service_name: "docs"
-        service_root: "docs"
+    inputs:
+      service_name: "docs"
+      service_root: "docs"
