@@ -18,3 +18,4 @@ spec:
 
   trigger:
     include: "[[ $inputs.service_root ]]/.*-ci.yml"
+    strategy: depend

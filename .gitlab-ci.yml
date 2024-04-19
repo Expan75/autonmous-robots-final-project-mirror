@@ -11,24 +11,26 @@ scan:
   stage: scan
   script: "echo 'scanning...'"
 
-include:
-  - local: "templates/trigger.yml"
-    inputs:
-      service_name: "ansible"
-      service_root: "ansible"
-  - local: "templates/trigger.yml"
-    inputs:
-      service_name: "web-service-template"
-      service_root: "web-service-template"
-  - local: "templates/trigger.yml"
-    inputs:
-      service_name: "robot-service-template"
-      service_root: "robot-service-template"
-  - local: "templates/trigger.yml"
-    inputs:
-      service_name: "robot-perception-service"
-      service_root: "robot-perception-service"
-  - local: "templates/trigger.yml"
-    inputs:
-      service_name: "docs"
-      service_root: "docs"
+meta-trigger:
+  stage: trigger
+  include:
+    - local: "templates/trigger.yml"
+      inputs:
+        service_name: "web-service-template"
+        service_root: "web-service-template"
+    - local: "templates/trigger.yml"
+      inputs:
+        service_name: "robot-service-template"
+        service_root: "robot-service-template"
+    - local: "templates/trigger.yml"
+      inputs:
+        service_name: "robot-perception-service"
+        service_root: "robot-perception-service"
+    - local: "templates/trigger.yml"
+      inputs:
+        service_name: "docs"
+        service_root: "docs"
+    - local: "templates/trigger.yml"
+      inputs:
+        service_name: "ansible"
+        service_root: "ansible"

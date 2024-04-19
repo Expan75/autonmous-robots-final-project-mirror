@@ -6,29 +6,22 @@ services:
 before_script:
   - cd ansible
 
-.base:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
-
 stages:
   - lint
   - test
   - release
 
 build:
-  extends: .base
   stage: lint
   script:
     - echo "linting playbooks"
 
 test:
-  extends: .base
   stage: test
   script:
     - echo "Running unit tests for all playbooks"
 
 release:
-  extends: .base
   stage: release
   script:
     - echo "Releasing new playbooks"
