@@ -8,8 +8,7 @@ image: docker
 services:
   - name: docker:dind
 
-default:
-  tags: ["docker-build"]
+tags: ["docker-build"]
 
 stages:
   - lint
