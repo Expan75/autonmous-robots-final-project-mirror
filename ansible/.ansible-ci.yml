@@ -1,7 +1,12 @@
+image: docker
+
+services:
+  - name: docker:dind
+
 before_script:
   - cd ansible
 
-workflow:
+.base:
   rules:
     - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
 
@@ -11,16 +16,19 @@ stages:
   - release
 
 build:
+  extends: .base
   stage: lint
   script:
     - echo "linting playbooks"
 
 test:
+  extends: .base
   stage: test
   script:
     - echo "Running unit tests for all playbooks"
 
 release:
+  extends: .base
   stage: release
   script:
-    - echo "Rreleasing new playbooks"
+    - echo "Releasing new playbooks"

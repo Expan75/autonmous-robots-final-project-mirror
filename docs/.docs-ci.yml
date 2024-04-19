@@ -3,24 +3,25 @@ image: docker
 services:
   - name: docker:dind
 
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
-
 stages:
   - build
   - release
+
+.base:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
 
 before_script:
   - "cd $SERVICE_DIRECTORY"
 
 build:
+  extends: .base
   stage: build
   script:
     - "echo 'building docs...'"
 
 release:
-  needs: ["build"]
+  extends: .base
   stage: release
   script:
     - "echo 'publishing docs...'"

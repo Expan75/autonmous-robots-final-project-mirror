@@ -6,24 +6,15 @@ spec:
     version_pattern:
       default: "v(\\d+.){1,2}\\d+"
 ---
-# neccessary for child jobs to be picked up
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
-dummy:
-  stage: trigger
-  script: "echo 'dummy'"
-
 "trigger-$[[ inputs.service_name ]]":
-  needs: ["dummy"]
   stage: trigger
   variables:
     RELEASE_TAG_PATTERN: "/^$[[ inputs.service_name ]]-$[[ inputs.version_pattern ]]$$/"
   rules:
-    # trigger if changes are found in child directory or a new tag was created
+    # trigger if tag matches release pattern or on service changes
+    - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN
     - changes:
         - "$[[ inputs.service_root ]]/**"
-    - if: $CI_COMMIT_TAG =~ $SERVICE_RELEASE_TAG_PATTERN
 
   trigger:
     include: "[[ $inputs.service_root ]]/.*-ci.yml"
