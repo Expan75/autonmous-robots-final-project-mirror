@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  data-replay-video-h264:
+    image: registry.opendlv.org/community/opendlv-data-replay-video-h264:1.1
+    network_mode: "host"
+    ipc: "host"
+    volumes:
+      - ./recordings:/opt/recordings
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --rgb --name=replay --autorewind /opt/recordings/kiwi_turn.rec"
+  Wait:
+    image: alpine
+    depends_on: 
+      data-replay-video-h264:
+        condition: service_started
+    command: "sleep 1"
+  data-perception:
+    image: registry.git.chalmers.se/erhaka/team11-project-monorepo:robot-perception-service-v1.0
+    depends_on: 
+      Wait:
+        condition: service_completed_successfully
+    network_mode: "host"
+    ipc: "host"
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --name=replay.rgb --width=640 --height=480 --verbose"
