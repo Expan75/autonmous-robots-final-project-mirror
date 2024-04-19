@@ -10,7 +10,6 @@ before_script:
   variables:
     RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
 
-  needs: ["info-$[[ inputs.service ]]"]
   stage: trigger
   rules:
     # trigger if a merge request is made containing changes for the service
