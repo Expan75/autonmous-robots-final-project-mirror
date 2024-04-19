@@ -3,13 +3,13 @@ spec:
   inputs:
     service:
 ---
-variables:
-  RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
-
 before_script:
   - printenv
 
 "trigger-$[[ inputs.service ]]":
+  variables:
+    RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
+
   needs: ["info-$[[ inputs.service ]]"]
   stage: trigger
   rules:

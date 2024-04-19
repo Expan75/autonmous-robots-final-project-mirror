@@ -3,9 +3,6 @@ spec:
   inputs:
     service:
 ---
-variables:
-  RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
-
 image: docker
 
 services:
@@ -41,6 +38,8 @@ stages:
     - "echo 'running unit tests...'"
 
 "release-$[[ inputs.service ]]":
+  variables:
+    RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
   rules:
     # gitlab pipeline source is a very confusing mess
     # https://stackoverflow.com/questions/72895047/gitlab-ci-check-if-branch-is-a-tag-or-not-and-then-executes-commands-based-on-br
