@@ -14,7 +14,7 @@ build:
     - "echo 'building web service...'"
 
 include:
-  - local: "templates/Release.yml"
+  - local: "templates/release.yml"
     inputs:
       service_name: "web-service-template"
       service_root: "web-service-template"

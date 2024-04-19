@@ -14,7 +14,7 @@ build:
     - docker build .
 
 include:
-  - local: "templates/Release.yml"
+  - local: "templates/release.yml"
     inputs:
       service_name: "robot-service-template"
       service_root: "robot-service-template"
