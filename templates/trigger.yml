@@ -27,7 +27,6 @@ variables:
   rules:
     # trigger if tag matches release pattern or on service changes
     - if: "$CI_COMMIT_TAG =~ $RELEASE_TAG_PATTERN"
-      when: "on_success"
     # less readable but necssary for changes to not trigger on everything
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
