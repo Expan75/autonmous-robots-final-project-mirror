@@ -3,20 +3,41 @@ image: docker
 services:
   - name: docker:dind
 
+stages:
+  - lint
+  - build
+  - test
+  - release
+
 before_script:
   - cd $SERVICE_ROOT
 
-stages:
-  - build
-  - release
+lint:
+  tags: ["docker-build"]
+  stage: lint
+  script:
+    - "echo 'running linter...'"
 
 build:
   tags: ["docker-build"]
   stage: build
   script:
-    - "echo 'building cloud service...'"
+    - "echo 'building $SERVICE_NAME'"
+
+unit-test:
+  tags: ["docker-build"]
+  stage: test
+  script:
+    - "echo 'running unit tests..."
+
+e2e-test:
+  tags: ["docker-build"]
+  stage: test
+  script:
+    - "echo 'running unit tests..."
 
 release:
+  stage: release
   tags: ["docker-build"]
   script:
-    - "echo 'releasing cloud service'"
+    - "echo 'releasing $SERVICE_NAME'"
