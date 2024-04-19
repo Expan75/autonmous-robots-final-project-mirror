@@ -28,13 +28,13 @@ unit-test:
   tags: ["docker-build"]
   stage: test
   script:
-    - "echo 'running unit tests..."
+    - "echo 'running unit tests...'"
 
 e2e-test:
   tags: ["docker-build"]
   stage: test
   script:
-    - "echo 'running unit tests..."
+    - "echo 'running unit tests...'"
 
 release:
   stage: release
