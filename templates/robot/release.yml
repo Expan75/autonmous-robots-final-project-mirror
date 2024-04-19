@@ -7,8 +7,7 @@ spec:
       default: "v(\\d+.){1,2}\\d+"
 
     platforms:
-      default:
-        - "linux/amd64,linux/arm64,linux/arm/v7"
+      default: "linux/amd64,linux/arm64,linux/arm/v7"
 ---
 "release-$[[ inputs.service_name ]]":
   stage: release
