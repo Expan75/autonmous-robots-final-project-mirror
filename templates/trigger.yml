@@ -6,12 +6,14 @@ spec:
     version_pattern:
       default: "v(\\d+.){1,2}\\d+"
 ---
-variables:
-  SERVICE_NAME: "$[[ inputs.service_name ]]"
-  SERVICE_ROOT: "$[[ inputs.service_root ]]"
-  RELEASE_TAG_PATTERN: "/^$[[ inputs.service_name ]]-$[[ inputs.version_pattern ]]$$/"
-
+# duplication of variables required for them to be included alongside
+# both trigger + printenv script, AND to be passed down to child.
 "info-$[[ inputs.service_name ]]":
+  variables:
+    SERVICE_NAME: "$[[ inputs.service_name ]]"
+    SERVICE_ROOT: "$[[ inputs.service_root ]]"
+    RELEASE_TAG_PATTERN: "/^$[[ inputs.service_name ]]-$[[ inputs.version_pattern ]]$$/"
+
   stage: trigger
   script:
     - printenv
