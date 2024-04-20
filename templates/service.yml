@@ -34,12 +34,12 @@ before_script:
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_TAG == null)'
       changes:
-        compare_to: "$CI_DEFAULT_BRANCH"
+        compare_to: "refs/heads/main"
         paths:
           - "$[[ inputs.service ]]/**"
     - if: '($CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG == null)'
       changes:
-        compare_to: "$CI_DEFAULT_BRANCH"
+        compare_to: "refs/heads/main"
         paths:
           - "$[[ inputs.service ]]/**"
 
