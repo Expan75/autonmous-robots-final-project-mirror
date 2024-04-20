@@ -1,5 +1,4 @@
 include:
-  - local: "templates/cloud-service-pipeline.yml"
+  - local: "templates/service.yml"
     inputs:
-      service: ansible
-      pattern: "ansible"
+      service: "ansible"
