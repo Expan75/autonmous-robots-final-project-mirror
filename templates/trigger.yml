@@ -9,7 +9,7 @@ before_script:
 "setup-$[[ inputs.service ]]":
   stage: trigger
   variables:
-    RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
+    RELEASE_TAG_PATTERN: "/$[[ inputs.service ]]-$VERSION_PATTERN$/"
 
   script:
     - printenv
@@ -18,10 +18,12 @@ before_script:
   needs: ["setup-$[[ inputs.service ]]"]
 
   variables:
-    RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
+    RELEASE_TAG_PATTERN: "/$[[ inputs.service ]]-$VERSION_PATTERN/"
 
   stage: trigger
   rules:
+    # NOTE: changes will always evaluate as true for tag pipelines, hence repitition
+
     # trigger if a merge request is made containing changes for the service
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_TAG == null)'
       changes:
