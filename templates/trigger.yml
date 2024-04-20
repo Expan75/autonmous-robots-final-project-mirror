@@ -3,26 +3,10 @@ spec:
   inputs:
     service:
 ---
-before_script:
-  - printenv
-
-".$[[ inputs.service ]]_base":
-  stage: trigger
-  variables:
-    RELEASE_PATTERN: "/$[[ inputs.service ]]*/i"
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_TAG == null)'
-      changes:
-        paths:
-          - "$[[ inputs.service ]]/**"
-    - if: '($CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG == null)'
-      changes:
-        paths:
-          - "$[[ inputs.service ]]/**"
-    - if: $CI_COMMIT_TAG =~ $RELEASE_PATTERN
-    - if: $CI_COMMIT_REF_SLUG =~ $RELEASE_PATTERN
-    - if: $DOCKER_ENV_CI_COMMIT_TAG =~ $RELEASE_PATTERN
-    - if: $DOCKER_ENV_CI_COMMIT_REF_SLUG =~ $RELEASE_PATTERN
+include:
+  - local: "templates/rules.yml"
+    inputs:
+      service: "$[[ inputs.service ]]"
 
 "trigger-$[[ inputs.service ]]":
   extends: ".$[[ inputs.service ]]_base"

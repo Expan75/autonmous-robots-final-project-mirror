@@ -2,8 +2,6 @@
 spec:
   inputs:
     service:
-    service_tag:
-      regex: "/[a-z|\-]+v(\d+\.){1,2}\d+/" # e.g. service-name-v1.0
 ---
 workflow:
   rules:
@@ -46,7 +44,7 @@ stages:
 
 "e2e-test-$[[ inputs.service ]]":
   stage: test
-  script:
+  scri:
     - "echo 'running unit tests...'"
 
 "release-$[[ inputs.service ]]":
