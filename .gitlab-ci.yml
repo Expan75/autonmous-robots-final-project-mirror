@@ -7,6 +7,9 @@ workflow:
 services:
   - docker:dind
 
+default:
+  tags: ["docker-build"]
+
 stages:
   - scan
   - trigger
@@ -42,7 +45,6 @@ include:
 
 # override secret detection so stage is "scan"
 secret_detection:
-  tags: ["docker-build"]
   stage: scan
   variables:
     SECRET_DETECTION_HISTORIC_SCAN: "true"

@@ -1,4 +1,4 @@
-# Gitlab component for triggering and delegating to a child pipeline
+# component-ish template for cloud services
 spec:
   inputs:
     service:
@@ -6,9 +6,10 @@ spec:
 image: docker
 
 services:
-  - name: docker:dind
+  - docker:dind
 
-tags: ["docker-build"]
+default:
+  tags: ["docker-build"]
 
 stages:
   - lint
