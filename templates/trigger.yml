@@ -24,6 +24,8 @@ before_script:
         paths:
           - "$[[ inputs.service ]]/**"
 
+    - if: '($CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG != null)'
+
     # trigger if tag is created that matches the release pattern.
     - if: "($CI_COMMIT_TAG != null && $CI_COMMIT_TAG =~ $RELEASE_TAG_PATTERN)"
 

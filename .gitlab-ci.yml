@@ -3,9 +3,6 @@ image: docker
 workflow:
   auto_cancel:
     on_job_failure: all
-  only:
-    - tags
-    - branches
 
 services:
   - docker:dind
