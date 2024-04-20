@@ -5,6 +5,11 @@ spec:
     platforms:
       default: "linux/amd64,linux/arm64,linux/arm/v7"
 ---
+workflow:
+  rules:
+    - exists:
+        - "$[[ inputs.service ]]/Dockerfile"
+
 image: docker
 
 services:
@@ -12,9 +17,6 @@ services:
 
 default:
   tags: ["docker-build"]
-  rules:
-    - exists:
-        - "$[[ inputs.service ]]/Dockerfile"
 
 before_script:
   - printenv
