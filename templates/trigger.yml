@@ -18,7 +18,7 @@ before_script:
   needs: ["setup-$[[ inputs.service ]]"]
 
   variables:
-    RELEASE_TAG_PATTERN: "/$[[ inputs.service ]]-$VERSION_PATTERN/"
+    RELEASE_TAG_PATTERN: "[[ inputs.service ]]-v.*"
 
   stage: trigger
   rules:
