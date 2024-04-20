@@ -4,21 +4,12 @@ workflow:
   auto_cancel:
     on_job_failure: all
 
-services:
-  - docker:dind
-
-default:
-  tags: ["docker-build"]
-
 stages:
   - scan
   - trigger
 
 before_script:
   - printenv
-
-variables:
-  VERSION_PATTERN: "v(\\d+.){1,2}\\d+"
 
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
