@@ -2,6 +2,8 @@
 spec:
   inputs:
     service:
+    service_tag:
+      regex: "/[a-z|\-]+v(\d+\.){1,2}\d+/" # e.g. service-name-v1.0
 ---
 workflow:
   rules:
