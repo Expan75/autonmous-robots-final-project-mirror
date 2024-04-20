@@ -40,16 +40,9 @@ stages:
   variables:
     RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
   rules:
-    # gitlab pipeline source is a very confusing mess
-    # https://stackoverflow.com/questions/72895047/gitlab-ci-check-if-branch-is-a-tag-or-not-and-then-executes-commands-based-on-br
-    # release a new build if we make a new tag, either via commit or via gitlab web GUI
     - if: "$CI_COMMIT_TAG != null && $CI_BUILD_TAG =~ $RELEASE_TAG_PATTERN"
     - if: "$CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $RELEASE_TAG_PATTERN"
   stage: release
   script:
     - cd "$[[ inputs.service ]]"
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
-    - docker run --privileged --rm tonistiigi/binfmt --install all
-    - docker context create builder
-    - docker buildx create builder --use
-    - docker buildx build --platform "$[[ inputs.platforms ]]" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
+    - docker build -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .
