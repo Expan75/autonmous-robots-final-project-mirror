@@ -32,6 +32,7 @@ before_script:
 
     # trigger if tag is created that matches the release pattern for the service
     - if: $SERVICE_RELEASE_IF
+    - if: $DOCKER_ENV_SERVICE_RELEASE_IF
 
   trigger:
     include: "$[[ inputs.service ]]/.*-ci.yml"
