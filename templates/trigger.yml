@@ -6,6 +6,10 @@ spec:
 before_script:
   - printenv
 
+default:
+  tags:
+    - shell
+
 "setup-$[[ inputs.service ]]":
   variables:
     RELEASE_IF1: "$CI_COMMIT_TAG =~ /^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+/ig"
