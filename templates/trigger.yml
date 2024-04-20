@@ -15,6 +15,8 @@ before_script:
     - printenv
 
 "trigger-$[[ inputs.service ]]":
+  needs: ["setup-$[[ inputs.service ]]"]
+
   variables:
     RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
 
