@@ -21,6 +21,7 @@ spec:
     - if: "$DOCKER_ENV_CI_COMMIT_REF_SLUG =~ $RELEASE_PATTERN"
 
 "trigger-$[[ inputs.service ]]":
+  stage: trigger
   extends: ".trigger_$[[ inputs.service ]]_rules"
   trigger:
     include: "$[[ inputs.service ]]/.*-ci.yml"
