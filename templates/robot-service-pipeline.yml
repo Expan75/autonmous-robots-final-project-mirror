@@ -12,6 +12,9 @@ services:
 
 default:
   tags: ["docker-build"]
+  rules:
+    - exists:
+        - "$[[ inputs.service ]]/Dockerfile"
 
 before_script:
   - printenv

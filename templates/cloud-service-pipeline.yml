@@ -10,17 +10,20 @@ services:
 
 default:
   tags: ["docker-build"]
+  rules:
+    - exists:
+        - "$[[ inputs.service ]]/Dockerfile"
+
+before_script:
+  - printenv
+  - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+  - cd "$[[ inputs.service ]]"
 
 stages:
   - lint
   - build
   - test
   - release
-
-before_script:
-  - printenv
-  - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
-  - cd "$[[ inputs.service ]]"
 
 "lint-$[[ inputs.service ]]":
   stage: lint
