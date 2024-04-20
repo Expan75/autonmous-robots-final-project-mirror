@@ -6,6 +6,7 @@ Team members:
 
 - Erik Håkansson
 - Kris Huang
+- Johannes Graule
 
 ### Structure & Organisation
 
