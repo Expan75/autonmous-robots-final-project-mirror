@@ -32,10 +32,10 @@ before_script:
 
 ".$[[ inputs.service ]]-base-rules":
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_TAG == null)'
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_TAG == null
       changes:
         - "$[[ inputs.service ]]/**"
-    - if: '($CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG == null)'
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG == null
       changes:
         - "$[[ inputs.service ]]/**"
 
