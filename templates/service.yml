@@ -57,7 +57,7 @@ before_script:
   extends: ".$[[ inputs.service ]]-build-rules"
   stage: build
   script:
-    - "docker build ."
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH:latest" --push .
 
 "release-$[[ inputs.service ]]":
   extends: ".$[[ inputs.service ]]-release-rules"
