@@ -8,16 +8,16 @@ before_script:
 
 "setup-$[[ inputs.service ]]":
   variables:
-    RELEASE_PATTERN: "/^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+$/"
+    RELEASE_IF1: "$CI_COMMIT_TAG =~ /^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+$/"
+    RELEASE_IF2: "$CI_COMMIT_REF_SLUG =~ /^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+$/"
+    RELEASE_IF3: "$DOCKER_ENV_CI_COMMIT_TAG =~ /^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+$/"
+    RELEASE_IF4: "$DOCKER_ENV_CI_COMMIT_REF_SLUG =~ /^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+$/"
   stage: trigger
   script:
     - printenv
 
 "trigger-$[[ inputs.service ]]":
   needs: ["setup-$[[ inputs.service ]]"]
-  variables:
-    RELEASE_PATTERN: "/^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+$/"
-
   stage: trigger
   rules:
     # NOTE: changes will always evaluate as true for tag pipelines, hence repitition
@@ -33,9 +33,10 @@ before_script:
           - "$[[ inputs.service ]]/**"
 
     # trigger if tag is created that matches the release pattern for the service
-    - if: "$DOCKER_ENV_CI_COMMIT_TAG =~ $RELEASE_PATTERN"
-    - if: "$DOCKER_ENV_CI_COMMIT_TAG =~ $RELEASE_PATTERN"
-    - if: "$DOCKER_ENV_CI_COMMIT_REF_SLUG =~ $RELEASE_PATTERN"
+    - if: $RELEASE_IF1
+    - if: $RELEASE_IF2
+    - if: $RELEASE_IF3
+    - if: $RELEASE_IF4
 
   trigger:
     include: "$[[ inputs.service ]]/.*-ci.yml"
