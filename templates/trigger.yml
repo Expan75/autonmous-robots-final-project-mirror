@@ -9,7 +9,7 @@ before_script:
 "setup-$[[ inputs.service ]]":
   stage: trigger
   variables:
-    RELEASE_TAG_PATTERN: "/$[[ inputs.service ]]-$VERSION_PATTERN$/"
+    RELEASE_TAG_PATTERN: "[[ inputs.service ]]-v.*"
 
   script:
     - printenv
