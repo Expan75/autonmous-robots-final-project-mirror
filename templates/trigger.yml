@@ -8,7 +8,7 @@ before_script:
 
 "setup-$[[ inputs.service ]]":
   variables:
-    SERVICE_RELEASE_IF: "$CI_COMMIT_TAG =~ /^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+$$/"
+    SERVICE_RELEASE_IF: "$CI_COMMIT_TAG =~ /^$[[ inputs.service ]]-v(\\d+.){1,2}\\d+$/"
   stage: trigger
   script:
     - printenv
