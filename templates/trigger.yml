@@ -6,6 +6,10 @@ spec:
 before_script:
   - printenv
 
+default:
+  variables:
+    RELEASE_CONDITION: '"$CI_COMMIT_TAG" =~ /^"$[[ inputs.service ]]"-v(\\d+.){1,2}\\d+$/'
+
 "setup-$[[ inputs.service ]]":
   stage: trigger
   script:
@@ -29,7 +33,7 @@ before_script:
           - "$[[ inputs.service ]]/**"
 
     # trigger if tag is created that matches the release pattern for the service
-    - if: '"$CI_COMMIT_TAG" =~ /^"$[[ inputs.service ]]"-v(\\d+.){1,2}\\d+$/'
+    - if: "$RELEASE_CONDITION"
 
   trigger:
     include: "$[[ inputs.service ]]/.*-ci.yml"
