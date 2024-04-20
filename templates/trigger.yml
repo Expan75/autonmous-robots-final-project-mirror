@@ -6,6 +6,15 @@ spec:
 before_script:
   - printenv
 
+"setup-$[[ inputs.service ]]":
+  stage: trigger
+  tage: trigger
+  variables:
+    RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
+
+  script:
+    - printenv
+
 "trigger-$[[ inputs.service ]]":
   variables:
     RELEASE_TAG_PATTERN: "/^$[[ inputs.service ]]-$VERSION_PATTERN$$/"
