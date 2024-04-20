@@ -15,7 +15,7 @@ before_script:
   - printenv
 
 variables:
-  VERSION_PATTERN: "-v(\\d+.){1,2}\\d+"
+  VERSION_PATTERN: "v(\\d+.){1,2}\\d+"
 
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
