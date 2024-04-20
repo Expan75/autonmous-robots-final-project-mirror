@@ -9,7 +9,7 @@ stages:
 
 before_script:
   - printenv
-  - "cd $SERVICE_DIRECTORY"
+  - cd docs
 
 build:
   stage: build
