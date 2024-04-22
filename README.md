@@ -8,6 +8,8 @@ Team members:
 - Kris Huang
 - Johannes Graule
 
+![System design](./images/system-design.png)
+
 ### Structure & Organisation
 
 ```bash
