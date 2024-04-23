@@ -13,6 +13,7 @@
 #include "cluon-complete.hpp"
 #include "opendlv-message-standard.hpp"
 
+
 bool comparePointx(cv::Point2f P1, cv::Point2f P2)
 {
   return (P1.x < P2.x);
@@ -21,6 +22,36 @@ bool comparePointx(cv::Point2f P1, cv::Point2f P2)
 bool comparePointy(cv::Point2f P1, cv::Point2f P2)
 {
   return (P1.y < P2.y);
+}
+bool comparePointInvy(cv::Point2f P1, cv::Point2f P2)
+{
+  return (P1.y > P2.y);
+}
+bool compareVectorPointx(std::vector<cv::Point> C1, std::vector<cv::Point> C2)
+{  
+  cv::Moments M1 = cv::moments(C1);
+  float center_x1 = static_cast<float>(M1.m10 / (M1.m00 + 1e-5));
+  cv::Moments M2 = cv::moments(C2);
+  float center_x2 = static_cast<float>(M2.m10 / (M2.m00 + 1e-5));
+  return (center_x1 < center_x2);
+}
+
+bool compareVectorPointy(std::vector<cv::Point> C1, std::vector<cv::Point> C2)
+{
+  cv::Moments M1 = cv::moments(C1);
+  float center_y1 = static_cast<float>(M1.m01 / (M1.m00 + 1e-5));
+  cv::Moments M2 = cv::moments(C2);
+  float center_y2 = static_cast<float>(M2.m01 / (M2.m00 + 1e-5));
+  return (center_y1 < center_y2);
+}
+
+bool compareVectorPointInvy(std::vector<cv::Point> C1, std::vector<cv::Point> C2)
+{
+  cv::Moments M1 = cv::moments(C1);
+  float center_y1 = static_cast<float>(M1.m01 / (M1.m00 + 1e-5));
+  cv::Moments M2 = cv::moments(C2);
+  float center_y2 = static_cast<float>(M2.m01 / (M2.m00 + 1e-5));
+  return (center_y1 > center_y2);
 }
 
 int32_t main(int32_t argc, char **argv)
@@ -115,10 +146,9 @@ int32_t main(int32_t argc, char **argv)
         sharedMemory->unlock();
 
         // TODO: Do something with the frame.    
-
         // Sharpening the image first
-        double alpha = 1.7; /*< Simple contrast control */
-        double beta = 3; /*< Simple brightness control */
+        double alpha = 2; /*< Simple contrast control */
+        double beta = 1; /*< Simple brightness control */
         cv::Mat sharpenImage;
         img.convertTo(sharpenImage, -1, alpha, beta); 
 
@@ -126,173 +156,139 @@ int32_t main(int32_t argc, char **argv)
         cv::Mat hsv;
         cv::cvtColor(sharpenImage, hsv, cv::COLOR_BGR2HSV);
 
-        // Only focus on the bottom part of the image
-        cv::Rect roi(0, hsv.rows / 2 , hsv.cols, hsv.rows / 2 );
+        // Only focus on the bottom 2/3 part of the image to avoid noise
+        cv::Rect roi(0, hsv.rows / 3 , hsv.cols, hsv.rows * 2 / 3 );
         cv::Mat bottom_half = hsv(roi);
-        cv::Mat kernel = (cv::Mat_<int>(3,3) << 1, 1, 1, 1, -8, 1, 1, 1, 1);
 
-        // Distinguish yellow and blue color from the image
-        // Find yellow color
-        cv::Scalar hsvLow(20, 50, 50);
-        cv::Scalar hsvHigh(50, 255, 255);
-        cv::Mat yellowCones;
-        cv::inRange(bottom_half, hsvLow, hsvHigh, yellowCones);   
+        // Extract the yellow and blue cones out of the image
+        cv::Mat yC_sharpen;
+        cv::Mat bC_sharpen;
+        cv::Mat bC_sharpen_1;
+        cv::Mat bC_sharpen_2;
+        cv::inRange(bottom_half, cv::Scalar(20,50,50), cv::Scalar(50,255,255), yC_sharpen);  
+        cv::inRange(bottom_half, cv::Scalar(110,50,50), cv::Scalar(130,255,255), bC_sharpen);  
 
-        // Extract the yellow color and transform to gray color to control by threshold
-        cv::Mat tempMat;
-        bottom_half.copyTo(tempMat,yellowCones);
-        cv::cvtColor(tempMat, yellowCones, cv::COLOR_BGR2GRAY );
-        // cv::GaussianBlur( Conesimg_gray, Conesimg_blur, cv::Size(5,5), 0 );
-        cv::threshold(yellowCones, yellowCones, 40, 255, cv::THRESH_TOZERO );
-        cv::dilate(yellowCones,yellowCones,kernel, cv::Point(-1,-1),3,1,1);
-        // cv::imshow("Yellow Cone Image", yellowCones);
+        // Further process the result to make more precise result
+        // Yellow cones part
+        cv::Mat yC_Mat;
+        cv::Mat element = getStructuringElement( cv::MORPH_RECT , cv::Size( 3,3 ), cv::Point( 0,0 ) );
+        img(roi).copyTo(yC_Mat,yC_sharpen);
+        cv::cvtColor(yC_Mat, yC_Mat, cv::COLOR_BGR2GRAY );
+        cv::GaussianBlur( yC_Mat, yC_Mat, cv::Size(5,5), 0 );
+        cv::threshold(yC_Mat, yC_Mat, 40, 255, cv::THRESH_TOZERO );
+        cv::morphologyEx( yC_Mat, yC_Mat, cv::MORPH_CLOSE , element );
+        cv::dilate(yC_Mat,yC_Mat,element, cv::Point(-1,-1),3,1,1);
+
+        // Blue cones part
+        cv::inRange(bottom_half, cv::Scalar(130,50,50), cv::Scalar(150,255,255), bC_sharpen_1);  
+        cv::inRange(bottom_half, cv::Scalar(150,50,50), cv::Scalar(170,255,255), bC_sharpen_2);  
+        cv::addWeighted( bC_sharpen_1, 0.25, bC_sharpen, 0.75, 0.0, bC_sharpen);
+        cv::addWeighted( bC_sharpen_2, 0.1, bC_sharpen, 0.9, 0.0, bC_sharpen);
+        cv::morphologyEx( bC_sharpen, bC_sharpen, cv::MORPH_CLOSE , element );
+        cv::dilate(bC_sharpen,bC_sharpen,element, cv::Point(-1,-1),3,1,1);
+        cv::threshold(bC_sharpen, bC_sharpen, 150, 255, cv::THRESH_TOZERO );
         
-        // Find blue color
-        cv::Scalar bhsvLow(100, 50, 50);
-        cv::Scalar bhsvHigh(150, 255, 255);
-        cv::Mat blueCones;
-        cv::inRange(bottom_half, bhsvLow, bhsvHigh, blueCones); 
+        // Find the contour of the extract cones image
+        std::vector<std::vector<cv::Point>> contours_blue;
+        std::vector<std::vector<cv::Point>> contours_yellow;
+        cv::findContours(bC_sharpen, contours_blue, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+        cv::findContours(yC_Mat, contours_yellow, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+        std::sort(contours_blue.begin(), contours_blue.end(), compareVectorPointInvy);     
+        std::sort(contours_yellow.begin(), contours_yellow.end(), compareVectorPointInvy);
 
-        // Extract the blue color and transform to gray color to control by threshold  
-        cv::Mat tempMat_b; 
-        bottom_half.copyTo(tempMat_b,blueCones);
-        cv::cvtColor(tempMat_b, blueCones, cv::COLOR_BGR2GRAY );
-        // cv::GaussianBlur( Conesimg_gray, Conesimg_blur, cv::Size(5,5), 0 );
-        cv::threshold(blueCones, blueCones, 115, 255, cv::THRESH_TOZERO );
-        cv::dilate(blueCones,blueCones,kernel, cv::Point(-1,-1),3,1,1);
-        // cv::imshow("Blue Cone Image", blueCones);
-
-        // Find contour for the cones
-        std::vector<std::vector<cv::Point>> contours_blue, contours_yellow;
-        cv::findContours(blueCones, contours_blue, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-        cv::findContours(yellowCones, contours_yellow, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-        // Find center point of the contours
-        std::vector<cv::Point2f> cPArray_b;
-        std::vector<cv::Point2f> cPArray_y;
-
-        // Dealing with yellow cones first
+        // Iterate over all yellow cones to process noises
+        cv::Mat PrintResult = img;
+        std::vector<cv::Point2f> usableYellowCones;   
+        cv::Rect IndicateRect;
         for ( std::size_t i = 0; i < contours_yellow.size(); i++ )
         {
-            cv::Moments M = cv::moments(contours_yellow[i]);
-            float center_x = static_cast<float>(M.m10 / (M.m00 + 1e-5));
-            float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
+          cv::Moments M = cv::moments(contours_yellow[i]);
+          float center_x = static_cast<float>(M.m10 / (M.m00 + 1e-5));
+          float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
 
-            // Ignore car
-            /*if ( ( center_x > hsv.cols / 5 && hsv.cols - center_x > hsv.cols / 5 ) && hsv.rows / 2 - center_y <= hsv.rows / 7 ){
-              continue;
-            }
-            */ // Uncommented in order to be able to use the contour vectors (otherwise length would be different)
-            // Put the point into the vector
-            cPArray_y.push_back(cv::Point2f(center_x, center_y ));
+          // Ignore car 
+          if ( bottom_half.rows - center_y <= bottom_half.rows / 4 && abs(center_x - bottom_half.cols / 2) <= bottom_half.rows / 4.8 ){
+            continue;
+          }
+
+          // Ignore too close to border noise
+          if ( center_y <= bottom_half.rows / 4 ){
+            continue;
+          }
+          
+          // Ignore drastically change slope     
+          if ( usableYellowCones.size() != 0 && center_x - usableYellowCones[usableYellowCones.size()-1].x > bottom_half.cols / 2){
+            continue;
+          }
+          
+          // Inidicate right cones in rectangle shape and add it to array
+          IndicateRect = cv::boundingRect(contours_yellow[i]);
+          cv::rectangle(PrintResult, cv::Point(IndicateRect.x,IndicateRect.y + img.rows / 3), cv::Point(IndicateRect.x + IndicateRect.width,IndicateRect.y + IndicateRect.height + img.rows / 3), cv::Scalar(0,255,255), 5);
+          usableYellowCones.push_back(cv::Point2f(center_x,center_y));
+        }  
+
+        // Further Ignore wrong position noise
+        for ( std::size_t i = 0; i < usableYellowCones.size(); i++ ) {
+          if ( usableYellowCones[0].x > bottom_half.cols / 2 ){
+            usableYellowCones.clear();
+            break;
+          }  
         }
-        //std::sort(cPArray_y.begin(), cPArray_y.end(), comparePointx); // Sort the vector for later use
-        
-        // Dealing with blue cones first
+
+        // Iterate over all blue cones to process noises 
+        std::vector<cv::Point2f> usableBlueCones;   
         for ( std::size_t i = 0; i < contours_blue.size(); i++ )
-        {
-            cv::Moments M = cv::moments(contours_blue[i]);
-            float center_x = static_cast<float>(M.m10 / (M.m00 + 1e-5));
-            float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
+        {        
+          cv::Moments M = cv::moments(contours_blue[i]);
+          float center_x = static_cast<float>(M.m10 / (M.m00 + 1e-5));
+          float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
 
-            /*// Ignore car
-            if ( ( center_x > hsv.cols / 5 && hsv.cols - center_x > hsv.cols / 5 ) && hsv.rows / 2 - center_y <= hsv.rows / 7 ){
-              continue;
-            }
-            */ // Uncommented in order to be able to use the contour vectors (otherwise length would be different)
-            // put the point into the vector
-            cPArray_b.push_back(cv::Point2f(center_x, center_y ));
-        }
-        //std::sort(cPArray_b.begin(), cPArray_b.end(), comparePointx); // Sort the vector for later use
-        
-        // Process two vector, mainly to further remove outliers
-        // Yellow cones part
-        std::vector<cv::Point2f> cPArray_y_temp;
-        //Creating boundry boxes
-        std::vector<std::vector<cv::Point2f>> cPoly_y(contours_yellow.size());
-        std::vector<cv::Rect> boundRect_y(contours_yellow.size());
-        for ( std::size_t i = 0; i < cPArray_y.size(); i++ )
-        {
-          // Color depending wheter the point has sorted out or not
-          cv::Scalar colorBoundry(0,0,0);
-          
-          if (i == 0 && cPArray_y[0].x > hsv.cols / 2)
-          {
-            // Ignore outlier origin
-            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
-          }    
-          else if ( cPArray_b.size() > 0 && cPArray_y[i].x > hsv.cols *3 / 4 )
-          {
-            // Ignore outlier yellow cones in wrong position
-            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
+          // Ignore too close to border noise for the bottom part (Including the car)
+          if ( bottom_half.rows - center_y <= bottom_half.rows / 4 && ( cv::contourArea(contours_blue[i]) <= bottom_half.rows * bottom_half.cols / 600 || abs(center_x - bottom_half.cols / 2) <= bottom_half.rows / 4 || center_x - bottom_half.cols / 2 <= 0 ) ){
+            continue;
           }
-          else if ( cPArray_y.size() > 1 && std::abs(cPArray_y[i].x - cPArray_y[i - 1].x) > hsv.cols / 3  )
-          {
-            // Ignore too far away outliers
-            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
-          }
-          else 
-          {
-            // Push the process point to the new array
-            cPArray_y_temp.push_back(cPArray_y[i]);
-            colorBoundry = cv::Scalar(0, 255, 0); //green if not sorted out
-          }
-          //Draw the boundry boxes and the point of the center with red if sorted out by the if cases or green if not
-          cv::circle( img, cv::Point2f(cPArray_y[i].x, cPArray_y[i].y + img.rows/2), 5, colorBoundry, cv::FILLED); 
-          cv::approxPolyDP( contours_yellow[i], cPoly_y[i], 1, true);
-          boundRect_y[i] = boundingRect(cPoly_y[i]);
-          rectangle(img, boundRect_y[i].tl()+cv::Point(0,img.rows/2), boundRect_y[i].br()+cv::Point(0,img.rows/2), colorBoundry, 1);
-          
-        }
-        
-        // Blue cones part
-        std::vector<cv::Point2f> cPArray_b_temp;
 
-        //Creating boundry boxes
-        std::vector<std::vector<cv::Point2f>> cPoly_b(contours_blue.size());
-        std::vector<cv::Rect> boundRect_b(contours_blue.size());
-        for ( std::size_t i = 0; i < cPArray_b.size(); i++ )
-        {
-          // Color depending wheter the point has sorted out or not
-          cv::Scalar colorBoundry(0,0,0);
-         
-          if ( cPArray_b[i].x < hsv.cols / 2 )
-          { // Ignore outlier origin && blue cones in wrong position
-            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
-          } else if ( cPArray_b.size() > 1 && std::abs(cPArray_b[i].x - cPArray_b[i - 1].x) > hsv.cols / 4  )
-          { // Ignore too far away outliers
-            colorBoundry = cv::Scalar(0, 0, 255); //red if sorted out
-          } else
-          {
-            // Push the process point to the new array
-            cPArray_b_temp.push_back(cPArray_b[i]);
-            colorBoundry = cv::Scalar(0, 255, 0); //green if send to the steering algorithm
+          // Ignore too close to border noise
+          if ( center_y <= bottom_half.rows / 4 ){
+            continue;
           }
-          //Draw the boundry boxes and the point of the center with red if sorted out by the if cases or green if not
-          cv::circle( img, cv::Point2f(cPArray_b[i].x, cPArray_b[i].y + img.rows/2), 5, colorBoundry, cv::FILLED); 
-          cv::approxPolyDP( contours_blue[i], cPoly_b[i], 1, true);
-          boundRect_b[i] = boundingRect(cPoly_b[i]);
-          rectangle(img, boundRect_b[i].tl()+cv::Point(0,img.rows/2), boundRect_b[i].br()+cv::Point(0,img.rows/2), colorBoundry, 1);
+
+          // Ignore wrong position noise
+          if ( usableYellowCones.size() !=0 &&  center_x  <= usableYellowCones[usableYellowCones.size() / 2].x ){
+            continue;
+          }
+
+          // Ignore drastically change point  
+          if ( usableBlueCones.size() != 0 && center_x - usableBlueCones[usableBlueCones.size()-1].x > bottom_half.cols* 5 / 12){
+            continue;
+          }
+
+          // Put the point into the vector 
+          IndicateRect = cv::boundingRect(contours_blue[i]);
+          cv::rectangle(PrintResult, cv::Point(IndicateRect.x,IndicateRect.y + img.rows / 3), cv::Point(IndicateRect.x + IndicateRect.width,IndicateRect.y + IndicateRect.height + img.rows / 3), cv::Scalar(255,0,0), 5);
+          usableBlueCones.push_back(cv::Point2f(center_x,center_y));
         }
 
-        // Sort two vectors for later use
-        std::sort(cPArray_b_temp.begin(), cPArray_b_temp.end(), comparePointy);      
-        std::sort(cPArray_y_temp.begin(), cPArray_y_temp.end(), comparePointy);
+        // Show the result
+        if (verbose){
+          cv::imshow("Result", PrintResult);
+          cv::waitKey(1);
+        }
 
         // Send message to another microservice
         opendlv::logic::perception::DetectionProperty message;
-        for ( std::size_t i = 0; i < cPArray_b_temp.size(); i++ )
+        for ( std::size_t i = 0; i < usableBlueCones.size(); i++ )
         {
           message.sampleId(i); //0 stands for the first point
           message.detectionId(1); //0 stands for yellow cone, 1 for the blue cone
-          message.property(std::to_string(cPArray_b_temp[i].x) + ";" + std::to_string(cPArray_b_temp[i].y)); //property stands for the position
+          message.property(std::to_string(usableBlueCones[i].x) + ";" + std::to_string(usableBlueCones[i].y)); //property stands for the position
           od4.send(message);
         }
-        for ( std::size_t i = 0; i < cPArray_y_temp.size(); i++ )
+        for ( std::size_t i = 0; i < usableYellowCones.size(); i++ )
         {
           message.sampleId(i); //0 stands for the first point
           message.detectionId(0); //0 stands for yellow cone, 1 for the blue cone
-          message.property(std::to_string(cPArray_y_temp[i].x) + ";" + std::to_string(cPArray_y_temp[i].y)); //property stands for the position
+          message.property(std::to_string(usableYellowCones[i].x) + ";" + std::to_string(usableYellowCones[i].y)); //property stands for the position
           od4.send(message);
         }
 
@@ -301,30 +297,30 @@ int32_t main(int32_t argc, char **argv)
         // Find the first and the last point and find the final aim point
         cv::Point2f yellowConeFpt, yellowConeLpt, blueConeFpt, blueConeLpt;
         cv::Point2f tempFpt, tempLpt, AimPt, CenterPt;
-        if ( cPArray_y_temp.size() > 0 && cPArray_b_temp.size() > 0 )
+        if ( usableYellowCones.size() > 0 && usableBlueCones.size() > 0 )
         {
-          yellowConeFpt = cv::Point2f(cPArray_y_temp[0].x, cPArray_y_temp[0].y + hsv.rows / 2);
-          yellowConeLpt = cv::Point2f(cPArray_y_temp[cPArray_y_temp.size()-1].x, cPArray_y_temp[cPArray_y_temp.size()-1].y + hsv.rows / 2);
-          blueConeFpt = cv::Point2f(cPArray_b_temp[0].x, cPArray_b_temp[0].y + hsv.rows / 2);
-          blueConeLpt = cv::Point2f(cPArray_b_temp[cPArray_b_temp.size()-1].x, cPArray_b_temp[cPArray_b_temp.size()-1].y + hsv.rows / 2);
+          yellowConeFpt = cv::Point2f(usableYellowCones[0].x, usableYellowCones[0].y + hsv.rows / 2);
+          yellowConeLpt = cv::Point2f(usableYellowCones[usableYellowCones.size()-1].x, usableYellowCones[usableYellowCones.size()-1].y + hsv.rows / 2);
+          blueConeFpt = cv::Point2f(usableBlueCones[0].x, usableBlueCones[0].y + hsv.rows / 2);
+          blueConeLpt = cv::Point2f(usableBlueCones[usableBlueCones.size()-1].x, usableBlueCones[usableBlueCones.size()-1].y + hsv.rows / 2);
         }
-        else if ( cPArray_y_temp.size() > 0 && cPArray_b_temp.size() == 0 )
+        else if ( usableYellowCones.size() > 0 && usableBlueCones.size() == 0 )
         {
-          yellowConeFpt = cv::Point2f(cPArray_y_temp[0].x, cPArray_y_temp[0].y + hsv.rows / 2);
-          yellowConeLpt = cv::Point2f(cPArray_y_temp[cPArray_y_temp.size()-1].x, cPArray_y_temp[cPArray_y_temp.size()-1].y + hsv.rows / 2);
+          yellowConeFpt = cv::Point2f(usableYellowCones[0].x, usableYellowCones[0].y + hsv.rows / 2);
+          yellowConeLpt = cv::Point2f(usableYellowCones[usableYellowCones.size()-1].x, usableYellowCones[usableYellowCones.size()-1].y + hsv.rows / 2);
           blueConeFpt = cv::Point2f(hsv.cols, hsv.rows);
           blueConeLpt = cv::Point2f(hsv.cols / 2, hsv.rows);
         }
-        else if( cPArray_y_temp.size() == 0 && cPArray_b_temp.size() > 0 )
+        else if( usableYellowCones.size() == 0 && usableBlueCones.size() > 0 )
         {  
           yellowConeFpt = cv::Point2f(0, hsv.rows);
           yellowConeLpt = cv::Point2f(hsv.cols / 2, hsv.rows);
-          blueConeFpt = cv::Point2f(cPArray_b_temp[0].x, cPArray_b_temp[0].y + hsv.rows / 2);
-          blueConeLpt = cv::Point2f(cPArray_b_temp[cPArray_b_temp.size()-1].x, cPArray_b_temp[cPArray_b_temp.size()-1].y + hsv.rows / 2);   
+          blueConeFpt = cv::Point2f(usableBlueCones[0].x, usableBlueCones[0].y + hsv.rows / 2);
+          blueConeLpt = cv::Point2f(usableBlueCones[usableBlueCones.size()-1].x, usableBlueCones[usableBlueCones.size()-1].y + hsv.rows / 2);   
         }
         tempFpt = cv::Point2f((yellowConeFpt.x + blueConeFpt.x) / 2, (yellowConeFpt.y + blueConeFpt.y) / 2);
         tempLpt = cv::Point2f((yellowConeLpt.x + blueConeLpt.x) / 2, (yellowConeLpt.y + blueConeLpt.y) / 2);
-        if ( cPArray_y_temp.size() == 0 )
+        if ( usableYellowCones.size() == 0 )
         {
           tempFpt = cv::Point2f((yellowConeFpt.x + tempFpt.x) / 2, (yellowConeFpt.y + tempFpt.y) / 2);
           tempLpt = cv::Point2f((yellowConeLpt.x + tempLpt.x) / 2, (yellowConeLpt.y + tempLpt.y) / 2);
@@ -343,19 +339,19 @@ int32_t main(int32_t argc, char **argv)
 
           cv::line(ResultMat, CenterPt, cv::Point2f(hsv.cols / 2, 0), cv::Scalar(0, 0, 255), 2, cv::LINE_8); 
           cv::line(ResultMat, CenterPt, AimPt, cv::Scalar(0, 255, 0), 2, cv::LINE_8); 
-          cv::imshow("Process Result", ResultMat);
+          // cv::imshow("Process Result", ResultMat);
           // cv::imshow(sharedMemory->name().c_str(), ResultMat);
-          cv::waitKey(1);
+          // cv::waitKey(1);
         }
 
         ////////////////////////////////////////////////////////////////
         // Do something with the distance readings if wanted.
         {
           std::lock_guard<std::mutex> lck(distancesMutex);
-          std::cout << "front = " << front << ", "
-                    << "rear = " << rear << ", "
-                    << "left = " << left << ", "
-                    << "right = " << right << "." << std::endl;
+          // std::cout << "front = " << front << ", "
+          //           << "rear = " << rear << ", "
+          //           << "left = " << left << ", "
+          //           << "right = " << right << "." << std::endl;
         }
 
         ////////////////////////////////////////////////////////////////
