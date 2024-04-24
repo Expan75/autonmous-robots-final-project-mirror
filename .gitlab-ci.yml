@@ -22,14 +22,6 @@ include:
 
   - local: "templates/trigger.yml"
     inputs:
-      service: "ansible"
-
-  - local: "templates/trigger.yml"
-    inputs:
-      service: "docs"
-
-  - local: "templates/trigger.yml"
-    inputs:
       service: "robot-perception-service"
       
   - local: "templates/trigger.yml"
