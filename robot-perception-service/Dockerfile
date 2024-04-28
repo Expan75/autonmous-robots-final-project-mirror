@@ -1,43 +1,40 @@
-# Copyright (C) 2024 OpenDLV
+# Build
 
-FROM ubuntu:22.04 as builder
-ENV DEBIAN_FRONTEND=noninteractive 
+FROM alpine:3.19 as builder
 
-RUN apt-get update
-RUN apt-get install -y \
-    build-essential \
-    cmake \
-    software-properties-common \
-    libopencv-dev
+RUN apk update && \
+    apk --no-cache add \
+        cmake \
+        g++ \
+        make \
+        linux-headers \
+        opencv-dev
 
-RUN add-apt-repository 'ppa:chrberger/libcluon' && \
-    apt-get update && \
-    apt-get install libcluon
+ADD CMakeLists.txt FindCluonMsc.cmake /opt/sources/
+ADD src /opt/sources/src
 
-ADD . /opt/sources
-WORKDIR /opt/sources
-RUN mkdir build && \
-    cd build && \
-    cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/tmp/dest .. && \
+RUN mkdir /opt/build /opt/out && \
+    cd /opt/build && \
+    cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/out \
+      /opt/sources && \
     make && make install
 
 
-FROM ubuntu:22.04
-ENV DEBIAN_FRONTEND=noninteractive 
+FROM alpine:3.19
 
-RUN apt-get update
-RUN apt-get install -y \
-    libopencv-core-dev \
-    libopencv-imgproc-dev \
-    libopencv-video-dev \
-    libopencv-calib3d-dev \
-    libopencv-features2d-dev \
-    libopencv-objdetect-dev \
-    libopencv-highgui-dev \
-    libopencv-videoio-dev \
-    libopencv-flann-dev\
-    python3-opencv
+RUN apk update && \
+   apk --no-cache add \
+    libopencv_core \
+    libopencv_imgproc \
+    libopencv_highgui
+    # libopencv_video \
+    # libopencv_calib3d \
+    # libopencv_features2d \
+    # libopencv_objdetect \
+    # libopencv_highgui \
+    # libopencv_videoio \
+    # libopencv_flann
+    # py3-opencv
 
-WORKDIR /usr/bin
-COPY --from=builder /tmp/dest /usr
+COPY --from=builder /opt/out/ /usr
 ENTRYPOINT ["/usr/bin/opendlv-perception-helloworld"]
