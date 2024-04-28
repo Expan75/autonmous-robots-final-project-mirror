@@ -6,6 +6,16 @@ volumes:
 
 networks:
   team11:
+<<<<<<< HEAD
+    name: team11
+    driver: bridge
+
+x-defaults: &service-defaults
+  hostname: cloud
+  restart: unless-stopped
+  labels:
+    org.label-schema.group: "team11-cloud"
+=======
     driver: bridge
 
 x-defaults: &service-defaults
@@ -13,6 +23,7 @@ x-defaults: &service-defaults
   labels:
     org.label-schema.group: "team11-cloud"
 
+>>>>>>> main
   networks:
     - team11
 

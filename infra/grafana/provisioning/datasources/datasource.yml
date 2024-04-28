@@ -8,4 +8,8 @@ datasources:
     url: http://prometheus:9090
     basicAuth: false
     isDefault: true
+<<<<<<< HEAD
     editable: true
+=======
+    editable: true
+>>>>>>> main

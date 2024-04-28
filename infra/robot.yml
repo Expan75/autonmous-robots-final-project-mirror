@@ -1,0 +1,64 @@
+# Docker compose for all robot services
+version: "3.8"
+
+networks:
+  team11:
+    name: team11
+    driver: bridge
+    external: true # wihtout this docker creates a new network
+
+x-defaults: &service-defaults
+  hostname: robot
+  restart: unless-stopped
+  labels:
+    org.label-schema.group: "team11-robot"
+  networks:
+    - team11
+
+services:
+  # robot perception service
+  # perception:
+  #   <<: *service-defaults
+  #   image: registry.git.chalmers.se/erhaka/team11-project-monorepo:robot-perception-service-v1.0
+  #   depends_on:
+  #     Wait:
+  #       condition: service_completed_successfully
+  #   volumes:
+  #     - /tmp:/tmp
+  #   environment:
+  #     - DISPLAY=${DISPLAY}
+  #   command: "--cid=111 --name=replay.rgb --width=640 --height=480 --verbose"
+
+  # host level monitoring
+  nodeexporter:
+    <<: *service-defaults
+    image: prom/node-exporter:v1.7.0
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    expose:
+      - 9100
+
+  # host level monitoring
+  cadvisor:
+    <<: *service-defaults
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: robot-cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro
+    ports:
+      - 8080
