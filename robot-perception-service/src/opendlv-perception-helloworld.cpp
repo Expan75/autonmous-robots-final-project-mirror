@@ -207,7 +207,7 @@ int32_t main(int32_t argc, char **argv)
           float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
 
           // Ignore car 
-          if ( static_cast<float>(bottom_half.rows) - center_y <= static_cast<float>(bottom_half.rows) / 4.0f && abs(center_x - static_cast<float>(bottom_half.cols) / 2.0f) <= static_cast<float>(bottom_half.rows) / 4.8f ){
+          if ( static_cast<float>(bottom_half.rows) - center_y <= static_cast<float>(bottom_half.rows) / 4.0f && std::fabs(center_x - static_cast<float>(bottom_half.cols) / 2.0f) <= static_cast<float>(bottom_half.rows) / 4.8f ){
             continue;
           }
 
@@ -244,7 +244,7 @@ int32_t main(int32_t argc, char **argv)
           float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
 
           // Ignore too close to border noise for the bottom part (Including the car)
-          if ( static_cast<float>(bottom_half.rows) - center_y <= static_cast<float>(bottom_half.rows) / 4.0f && ( cv::contourArea(contours_blue[i]) <= static_cast<float>(bottom_half.rows) * static_cast<float>(bottom_half.cols) / 600.0f || abs(center_x - static_cast<float>(bottom_half.cols) / 2.0f) <= static_cast<float>(bottom_half.rows) / 4.0f || center_x - static_cast<float>(bottom_half.cols) / 2.0f <= 0.0f ) ){
+          if ( static_cast<float>(bottom_half.rows) - center_y <= static_cast<float>(bottom_half.rows) / 4.0f && ( cv::contourArea(contours_blue[i]) <= static_cast<float>(bottom_half.rows) * static_cast<float>(bottom_half.cols) / 600.0f ||std::fabs(center_x - static_cast<float>(bottom_half.cols) / 2.0f) <= static_cast<float>(bottom_half.rows) / 4.0f || center_x - static_cast<float>(bottom_half.cols) / 2.0f <= 0.0f ) ){
             continue;
           }
 
