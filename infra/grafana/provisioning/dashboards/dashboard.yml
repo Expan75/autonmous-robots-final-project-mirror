@@ -1,22 +1,12 @@
 apiVersion: 1
 
 providers:
-<<<<<<< HEAD
   - name: "Prometheus"
     orgId: 1
     folder: ""
-=======
-  - name: 'Prometheus'
-    orgId: 1
-    folder: ''
->>>>>>> main
     type: file
     disableDeletion: false
     editable: true
     allowUiUpdates: true
     options:
-<<<<<<< HEAD
       path: /etc/grafana/provisioning/dashboards
-=======
-      path: /etc/grafana/provisioning/dashboards
->>>>>>> main

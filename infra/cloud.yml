@@ -6,7 +6,6 @@ volumes:
 
 networks:
   team11:
-<<<<<<< HEAD
     name: team11
     driver: bridge
 
@@ -15,22 +14,25 @@ x-defaults: &service-defaults
   restart: unless-stopped
   labels:
     org.label-schema.group: "team11-cloud"
-=======
-    driver: bridge
-
-x-defaults: &service-defaults
-  restart: unless-stopped
-  labels:
-    org.label-schema.group: "team11-cloud"
-
->>>>>>> main
   networks:
     - team11
 
 services:
+  # automatically pulls updates
+  watchtower:
+    <<: *service-defaults
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - 8080
+    command: --interval 15 --http-api-metrics --http-api-token demotoken
+
+  # reverse proxy and basic auth http
   caddy:
     <<: *service-defaults
-    image: caddy:2.7.6
+    image: caddy:latest
     container_name: caddy
     ports:
       - "3000:3000"
@@ -38,17 +40,17 @@ services:
       - "9090:9090"
       - "9093:9093"
       - "9091:9091"
+      - "8081:8081"
     volumes:
       - ./caddy:/etc/caddy
     environment:
       - ADMIN_USER=${ADMIN_USER}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
-    restart: unless-stopped
 
   grafana:
     <<: *service-defaults
-    image: grafana/grafana:10.4.0
+    image: grafana/grafana:latest
     container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
@@ -63,7 +65,7 @@ services:
 
   prometheus:
     <<: *service-defaults
-    image: prom/prometheus:v2.50.1
+    image: prom/prometheus:latest
     container_name: prometheus
     volumes:
       - ./prometheus:/etc/prometheus
@@ -80,7 +82,7 @@ services:
 
   alertmanager:
     <<: *service-defaults
-    image: prom/alertmanager:v0.27.0
+    image: prom/alertmanager:latest
     container_name: alertmanager
     volumes:
       - ./alertmanager:/etc/alertmanager
@@ -93,7 +95,7 @@ services:
 
   nodeexporter:
     <<: *service-defaults
-    image: prom/node-exporter:v1.7.0
+    image: prom/node-exporter:latest
     container_name: nodeexporter
     volumes:
       - /proc:/host/proc:ro
@@ -109,7 +111,7 @@ services:
 
   cadvisor:
     <<: *service-defaults
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     privileged: true
     devices:
@@ -121,11 +123,11 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
       #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
     expose:
-      - 8080
+      - 8081
 
   pushgateway:
     <<: *service-defaults
-    image: prom/pushgateway:v1.7.0
+    image: prom/pushgateway:latest
     container_name: pushgateway
     expose:
       - 9091
