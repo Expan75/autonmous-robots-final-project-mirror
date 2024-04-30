@@ -1,0 +1,5 @@
+include:
+  - local: "templates/service.yml"
+    inputs:
+      service: "robot-perception-service"
+      platforms: "linux/amd64,linux/arm64,linux/arm/v7,linux/arm64/v8"

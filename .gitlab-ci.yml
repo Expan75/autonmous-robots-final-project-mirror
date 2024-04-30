@@ -26,6 +26,10 @@ include:
       
   - local: "templates/trigger.yml"
     inputs:
+      service: "robot-papper-perception-service"          
+      
+  - local: "templates/trigger.yml"
+    inputs:
       service: "robot-steering-service"
 
   - local: "templates/trigger.yml"
