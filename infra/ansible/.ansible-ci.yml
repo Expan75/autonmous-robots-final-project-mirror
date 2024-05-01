@@ -1,4 +1,13 @@
-include:
-  - local: "templates/service.yml"
-    inputs:
-      service: "ansible"
+# unlike our other pipelines, ansible builds are not really a thing.
+
+stages:
+  - lint
+  - test
+
+lint:
+  stage: lint
+  script: "echo 'placeholder linting ansible..,'"
+
+test:
+  stage: test
+  script: "echo 'placeholder testing ansible..,'"

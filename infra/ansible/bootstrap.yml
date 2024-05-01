@@ -1,0 +1,73 @@
+# Base playbook for bootstrapping a debian or raspberry host
+---
+- name: Boostrap team11 host
+  hosts:
+    - cloud
+  tasks:
+    - name: gather
+      block:
+        - name: Check if monorepo exists
+          stat:
+            path: /home/pi/team11-project-monorepo
+          register: monorepo_exists
+
+        - name: Check if tailscale installed
+          shell: sudo tailscale version
+          register: tailscale_installed
+
+        - name: Check if docker installed
+          shell: sudo docker version
+          register: docker_installed
+
+        - name: Save environment variables
+          blockinfile:
+            dest: ~/.bashrc
+            block: |
+              export GITLAB_URI={{ gitlab.uri }}
+              export GITLAB_USER={{ gitlab.user }}
+              export GITLAB_TOKEN={{ gitlab.token }}
+              export ADMIN_USER={{ grafana.user }}
+              export ADMIN_PASSWORD={{ grafana.password }}
+              export ADMIN_PASSWORD_HASH={{ grafana.password_hash }}
+
+    - name: setup tailscale
+      when: tailscale_installed.rc != 0
+      block:
+        - name: add tailscale signing key
+          script: curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+
+        - name: add repository
+          script: curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
+
+        - name: update and install client
+          apt:
+            name: tailscale
+            update_cache: yes
+
+        - name: start tailscale service
+          script: sudo tailscale up --authkey {{ tailscale.auth_key }}
+
+    - name: setup docker
+      when: docker_installed.rc != 0
+      block:
+        - name: install docker
+          script: curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
+
+        - name: verify docker
+          script: sudo docker run hello-world
+
+        - name: login to private repository
+          shell: . /home/pi/.bashrc && sudo docker login $GITLAB_URI -u $GITLAB_USER --password-stdin <<< $GITLAB_TOKEN
+
+    - name: clone gitlab monorepo
+      when: not monorepo_exists.stat.exists
+      git:
+        repo: "https://{{ gitlab.user }}:{{ gitlab.token }}{{'@'}}{{ gitlab.uri }}"
+        clone: true
+        depth: 1
+        dest: /home/pi/team11-project-monorepo
+
+    - name: start cloud
+      shell: . /home/pi/.bashrc && sudo docker compose -f cloud.yml up -d
+      args:
+        chdir: /home/pi/team11-project-monorepo/infra
