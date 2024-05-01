@@ -1,25 +1,41 @@
 # Docker compose for all robot services
 version: "3.8"
 
-x-defaults: &service-defaults
-  hostname: robot
+x-base: &service-base
   restart: unless-stopped
   labels:
     org.label-schema.group: "team11-robot"
 
+x-defaults: &service-defaults
+  <<: *service-base
+  network_mode: service:tailscale
+  depends_on:
+    - tailscale
+
 services:
-  # automatically pulls updates
+  # VPN client that doesn't mess with native host network settings
+  tailscale:
+    <<: *service-base
+    image: tailscale/tailscale:latest
+    cap_add:
+      - net_admin
+      - sys_module
+    volumes:
+      - ./tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_HOSTNAME=team11-robot
+      - TS_AUTHKEY=tskey-auth-kXdsQDr95921CNTRL-gpV35r9oSrLapPWivreskLzePvgUUcof
+
   watchtower:
     <<: *service-defaults
     container_name: watchtower
     image: containrrr/watchtower:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "8080:8080"
     command: --interval 15 --http-api-metrics --http-api-token demotoken
-
   # host level monitoring
+
   nodeexporter:
     <<: *service-defaults
     image: prom/node-exporter:latest
@@ -33,9 +49,6 @@ services:
       - "--path.rootfs=/rootfs"
       - "--path.sysfs=/host/sys"
       - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
-    ports:
-      - "9100:9100"
-
   # host level monitoring
   cadvisor:
     <<: *service-defaults
@@ -50,5 +63,5 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /cgroup:/cgroup:ro
-    ports:
-      - "8081:8080"
+    command:
+      - "-port=9101"

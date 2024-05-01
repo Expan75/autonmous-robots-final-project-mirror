@@ -26,9 +26,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:
-      - 8080
+      - 8081
     command: --interval 15 --http-api-metrics --http-api-token demotoken
-
   # reverse proxy and basic auth http
   caddy:
     <<: *service-defaults
@@ -123,7 +122,7 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
       #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
     expose:
-      - 8081
+      - 8080
 
   pushgateway:
     <<: *service-defaults

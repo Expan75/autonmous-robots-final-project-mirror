@@ -18,17 +18,17 @@ scrape_configs:
     metrics_path: /v1/metrics
     bearer_token: demotoken
     static_configs:
-      - targets: ["watchtower:8080", "robot:8080"]
+      - targets: ["watchtower:8080", "team11-robot:8080"]
 
   - job_name: "nodeexporter"
     scrape_interval: 5s
     static_configs:
-      - targets: ["nodeexporter:9100", "robot:9100"]
+      - targets: ["nodeexporter:9100", "team11-robot:9100"]
 
   - job_name: "cadvisor"
     scrape_interval: 5s
     static_configs:
-      - targets: ["cadvisor:8081", "robot:8081"]
+      - targets: ["cadvisor:8081", "team11-robot:9101"]
 
   - job_name: "prometheus"
     scrape_interval: 10s
