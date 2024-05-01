@@ -24,6 +24,7 @@ services:
       # expects an reuseable ethemeral token
       - TS_AUTHKEY=tskey-auth-kXdsQDr95921CNTRL-gpV35r9oSrLapPWivreskLzePvgUUcof
       - TS_ACCEPT_DNS=1
+      - TS_HOSTNAME=team11-robot
 
   # automatically pulls updates
   watchtower:
