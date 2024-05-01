@@ -1,10 +1,27 @@
 # Base playbook for bootstrapping a debian or raspberry host
 ---
 - name: Boostrap team11 host
-  hosts:
-    - cloud
   tasks:
-    - name: gather
+    # adds environemnt variables for team11
+    - name: add gitlab variables
+      blockinfile:
+        dest: ~/.bashrc
+        block: |
+          export T11_GITLAB_URI={{ gitlab.uri }}
+          export T11_GITLAB_USER={{ gitlab.user }}
+          export T11_GITLAB_TOKEN={{ gitlab.token }}
+
+    - name: add cloud variables
+      hosts:
+        - cloud
+      blockinfile:
+        dest: ~/.bashrc
+        block: |
+          export ADMIN_USER={{ grafana.user }}
+          export ADMIN_PASSWORD={{ grafana.password }}
+          export ADMIN_PASSWORD_HASH={{ grafana.password_hash }}
+
+    - name: gather services installed
       block:
         - name: Check if monorepo exists
           stat:
@@ -12,25 +29,16 @@
           register: monorepo_exists
 
         - name: Check if tailscale installed
-          shell: sudo tailscale version
+          shell: sudo tailscale version | /bin/true
           register: tailscale_installed
 
         - name: Check if docker installed
-          shell: sudo docker version
+          shell: sudo docker version | /bin/true
           register: docker_installed
 
-        - name: Save environment variables
-          blockinfile:
-            dest: ~/.bashrc
-            block: |
-              export GITLAB_URI={{ gitlab.uri }}
-              export GITLAB_USER={{ gitlab.user }}
-              export GITLAB_TOKEN={{ gitlab.token }}
-              export ADMIN_USER={{ grafana.user }}
-              export ADMIN_PASSWORD={{ grafana.password }}
-              export ADMIN_PASSWORD_HASH={{ grafana.password_hash }}
-
     - name: setup tailscale
+      hosts:
+        - cloud
       when: tailscale_installed.rc != 0
       block:
         - name: add tailscale signing key
@@ -56,8 +64,8 @@
         - name: verify docker
           script: sudo docker run hello-world
 
-        - name: login to private repository
-          shell: . /home/pi/.bashrc && sudo docker login $GITLAB_URI -u $GITLAB_USER --password-stdin <<< $GITLAB_TOKEN
+    - name: setup gitlab container registry access
+      shell: . /home/pi/.bashrc && sudo docker login $T11_GITLAB_URI -u $T11_GITLAB_USER --password-stdin <<< $T11_GITLAB_TOKEN
 
     - name: clone gitlab monorepo
       when: not monorepo_exists.stat.exists
@@ -67,7 +75,23 @@
         depth: 1
         dest: /home/pi/team11-project-monorepo
 
-    - name: start cloud
-      shell: . /home/pi/.bashrc && sudo docker compose -f cloud.yml up -d
-      args:
-        chdir: /home/pi/team11-project-monorepo/infra
+    - name: start cloud services
+      block:
+        - name: start cloud containers
+          hosts:
+            - cloud
+          shell: . /home/pi/.bashrc && sudo docker compose -f cloud.yml up -d
+          args:
+            chdir: /home/pi/team11-project-monorepo/infra
+
+        - name: start robot services
+          hosts: all:!cloud
+          vars_prompt:
+            - name: deployment
+              prompt: >
+                "Please select a service set out of {stable, experimental};
+                alternatively press enter to use default (stable):"
+              default: stable
+          shell: . /home/pi/.bashrc&& sudo docker compose -f "robot-{{ deployment }}.yml" up -d
+          args:
+            chdir: /home/pi/team11-project-monorepo/infra
