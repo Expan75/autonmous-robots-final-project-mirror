@@ -1,0 +1,60 @@
+{"logtail": {"client_time": "2024-05-01T17:51:05.8646017Z","proc_id": 39801608,"proc_seq": 425}, "text": "Accept: TCP{100.126.124.31:42128 > 100.107.16.23:8080} 60 tcp ok\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:05.8694348Z","proc_id": 39801608,"proc_seq": 426}, "text": "[RATELIMIT] format(\"netstack: could not connect to local server at %s: %v\") (2 dropped)\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:05.8724197Z","proc_id": 39801608,"proc_seq": 427}, "text": "netstack: could not connect to local server at 127.0.0.1:8080: dial tcp 127.0.0.1:8080: connect: connection refused\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.5979156Z","proc_id": 39801608,"proc_seq": 428}, "v":2,"text": "netstack: forwarder connection to 127.0.0.1:9100 closed\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9260784Z","proc_id": 39801608,"proc_seq": 429}, "text": "tailscaled got signal terminated; shutting down\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9300793Z","proc_id": 39801608,"proc_seq": 430}, "text": "EditPrefs: MaskedPrefs{WantRunning=false LoggedOut=true}\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9434225Z","proc_id": 39801608,"proc_seq": 431}, "text": "control: setPaused(true)\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9467221Z","proc_id": 39801608,"proc_seq": 432}, "text": "Switching ipn state Running -> Stopped (WantRunning=false, nm=true)\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9506372Z","proc_id": 39801608,"proc_seq": 433}, "text": "control: updateRoutine: awaiting unpause\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9548045Z","proc_id": 39801608,"proc_seq": 434}, "text": "control: mapRoutine: paused\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9571961Z","proc_id": 39801608,"proc_seq": 435}, "text": "control: mapRoutine: awaiting unpause\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.961523Z","proc_id": 39801608,"proc_seq": 436}, "v":1,"text": "control: authRoutine: context done.\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9663758Z","proc_id": 39801608,"proc_seq": 437}, "text": "health(\"overall\"): error: state=Stopped, wantRunning=false\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9692001Z","proc_id": 39801608,"proc_seq": 438}, "text": "magicsock: SetPrivateKey called (zeroed)\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9734Z","proc_id": 39801608,"proc_seq": 439}, "text": "control: authRoutine: awaiting unpause\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.985924Z","proc_id": 39801608,"proc_seq": 440}, "text": "magicsock: closing connection to derp-14 (zero-private-key), age 5m56s\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9902713Z","proc_id": 39801608,"proc_seq": 441}, "text": "magicsock: 0 active derp conns\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:06.9976306Z","proc_id": 39801608,"proc_seq": 442}, "v":1,"text": "magicsock: doing cleanup for discovery key d:28be482ca034b5c2\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0100462Z","proc_id": 39801608,"proc_seq": 443}, "v":1,"text": "magicsock: doing cleanup for discovery key d:6ab7817b43835be9\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0180454Z","proc_id": 39801608,"proc_seq": 444}, "v":1,"text": "magicsock: doing cleanup for discovery key d:f1b6c824ac662a58\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0237675Z","proc_id": 39801608,"proc_seq": 445}, "v":1,"text": "magicsock: peermtu: peer MTU status is false\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0263335Z","proc_id": 39801608,"proc_seq": 446}, "text": "wgengine: Reconfig: configuring userspace WireGuard config (with 0/0 peers)\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0365738Z","proc_id": 39801608,"proc_seq": 447}, "v":1,"text": "control: HostInfo: {\"IPNVersion\":\"1.64.2-tede81e266\",\"BackendLogID\":\"f660793c1527d8a62ace5c0d633c5ee9edff95b3f5c6c46672a8c9ca9dfee380\",\"OS\":\"linux\",\"OSVersion\":\"5.10.76-linuxkit\",\"Container\":true,\"Distro\":\"alpine\",\"DistroVersion\":\"3.18.6\",\"Desktop\":false,\"Hostname\":\"team11-robot\",\"Machine\":\"x86_64\",\"GoArch\":\"amd64\",\"GoArchVar\":\"v1\",\"GoVersion\":\"go1.22.2\",\"Services\":[{\"Proto\":\"peerapi-dns-proxy\",\"Port\":1}],\"Userspace\":true,\"UserspaceRouter\":true,\"AppConnector\":false}\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0430129Z","proc_id": 39801608,"proc_seq": 448}, "v":2,"text": "wg: UAPI: Updating private key\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0550903Z","proc_id": 39801608,"proc_seq": 449}, "v":2,"text": "wg: peer(O88q…+fB4) - UAPI: Removing\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0578477Z","proc_id": 39801608,"proc_seq": 450}, "v":2,"text": "wg: peer(O88q…+fB4) - Stopping\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0601984Z","proc_id": 39801608,"proc_seq": 451}, "v":2,"text": "wg: peer(rXzs…zd0s) - UAPI: Removing\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.062947Z","proc_id": 39801608,"proc_seq": 452}, "v":2,"text": "wg: peer(rXzs…zd0s) - Stopping\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0652433Z","proc_id": 39801608,"proc_seq": 453}, "text": "wgengine: Reconfig: configuring router\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0672196Z","proc_id": 39801608,"proc_seq": 454}, "v":1,"text": "warning: fakeRouter.Set: not implemented.\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0698124Z","proc_id": 39801608,"proc_seq": 455}, "text": "wgengine: Reconfig: configuring DNS\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0712974Z","proc_id": 39801608,"proc_seq": 456}, "text": "dns: Set: {DefaultResolvers:[] Routes:{} SearchDomains:[] Hosts:0}\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0727113Z","proc_id": 39801608,"proc_seq": 457}, "text": "dns: Resolvercfg: {Routes:{} Hosts:0 LocalDomains:[]}\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0740665Z","proc_id": 39801608,"proc_seq": 458}, "text": "dns: OScfg: {}\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0755828Z","proc_id": 39801608,"proc_seq": 459}, "v":1,"text": "wgengine: Reconfig done\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0769476Z","proc_id": 39801608,"proc_seq": 460}, "text": "control: client.Logout()\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0786156Z","proc_id": 39801608,"proc_seq": 461}, "v":1,"text": "control: direct.TryLogout()\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0810574Z","proc_id": 39801608,"proc_seq": 462}, "text": "control: logging out...\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.0828485Z","proc_id": 39801608,"proc_seq": 463}, "text": "control: doLogin(regen=false, hasUrl=false)\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.084577Z","proc_id": 39801608,"proc_seq": 464}, "text": "control: RegisterReq: onode= node=[pfIVi] fup=false nks=false\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1311854Z","proc_id": 39801608,"proc_seq": 465}, "text": "control: RegisterReq: got response; nodeKeyExpired=true, machineAuthorized=true; authURL=false\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1359098Z","proc_id": 39801608,"proc_seq": 466}, "text": "control: server reports new node key [pfIVi] has expired\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1385448Z","proc_id": 39801608,"proc_seq": 467}, "v":1,"text": "control: TryLogout control response: mustRegen=true, newURL=, err=<nil>\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1418597Z","proc_id": 39801608,"proc_seq": 468}, "v":1,"text": "control: sendStatus: authRoutine-wantout: state:not-authenticated\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1438602Z","proc_id": 39801608,"proc_seq": 469}, "text": "logged out ephemeral node on shutdown\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1474777Z","proc_id": 39801608,"proc_seq": 470}, "text": "control: client.Shutdown()\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1515011Z","proc_id": 39801608,"proc_seq": 471}, "v":1,"text": "authReconfig: skipping because !WantRunning.\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1578988Z","proc_id": 39801608,"proc_seq": 472}, "text": "control: client.Shutdown\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1629657Z","proc_id": 39801608,"proc_seq": 473}, "text": "control: authRoutine: exiting\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1662417Z","proc_id": 39801608,"proc_seq": 474}, "text": "control: updateRoutine: exiting\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1686919Z","proc_id": 39801608,"proc_seq": 475}, "text": "control: mapRoutine: exiting\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1712987Z","proc_id": 39801608,"proc_seq": 476}, "text": "control: Client.Shutdown done.\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1744273Z","proc_id": 39801608,"proc_seq": 477}, "v":1,"text": "warning: fakeRouter.Close: not implemented.\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1760766Z","proc_id": 39801608,"proc_seq": 478}, "v":2,"text": "wg: Device closing\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1772026Z","proc_id": 39801608,"proc_seq": 479}, "v":2,"text": "wg: Routine: receive incoming mkReceiveFunc - stopped\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1781653Z","proc_id": 39801608,"proc_seq": 480}, "v":2,"text": "wg: Routine: receive incoming mkReceiveFunc - stopped\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1800656Z","proc_id": 39801608,"proc_seq": 481}, "v":2,"text": "wg: Routine: receive incoming receiveDERP - stopped\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1818699Z","proc_id": 39801608,"proc_seq": 482}, "v":2,"text": "wg: Device closed\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1833546Z","proc_id": 39801608,"proc_seq": 483}, "text": "flushing log.\n"}
+{"logtail": {"client_time": "2024-05-01T17:51:07.1849917Z","proc_id": 39801608,"proc_seq": 484}, "text": "logger closing down\n"}

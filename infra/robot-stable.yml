@@ -20,12 +20,12 @@ services:
     cap_add:
       - net_admin
       - sys_module
+    volumes:
+      - ./tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
     environment:
-      # expects an reuseable ethemeral token
-      - TS_AUTHKEY=tskey-auth-kXdsQDr95921CNTRL-gpV35r9oSrLapPWivreskLzePvgUUcof
-      - TS_ROUTES=1
-      - TS_ACCEPT_DNS=1
       - TS_HOSTNAME=team11-robot
+      - TS_AUTHKEY=tskey-auth-kXdsQDr95921CNTRL-gpV35r9oSrLapPWivreskLzePvgUUcof
 
   watchtower:
     <<: *service-defaults
@@ -35,6 +35,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 15 --http-api-metrics --http-api-token demotoken
   # host level monitoring
+
   nodeexporter:
     <<: *service-defaults
     image: prom/node-exporter:latest
