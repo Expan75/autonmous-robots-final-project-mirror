@@ -17,7 +17,7 @@ int32_t main(int32_t argc, char **argv)
   }
 
   uint16_t const cid = std::stoi(cmd.at("cid"));
-  bool const verbose = (cmd.count("verbose") != 0);
+  // bool const verbose = (cmd.count("verbose") != 0);
   if (cid != 111) {
     std::cout << cid << " is not an valid conference ID number." << std::endl;
     return 0;
