@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(robot-steering-service)
+project(robot-cone-steering-service)
 
 set(OPENDLV_MESSAGE_STANDARD opendlv-message-standard-1.0.odvd)
 set(CLUON_COMPLETE cluon-complete-v0.0.145.hpp)

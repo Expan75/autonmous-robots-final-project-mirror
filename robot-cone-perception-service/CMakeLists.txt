@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(opendlv-perception-helloworld)
+project(robot-cone-perception-service)
 
 # Defining the relevant versions of OpenDLV Standard Message Set and libcluon.
 set(OPENDLV_MESSAGE_STANDARD opendlv-message-standard-1.0.odvd)

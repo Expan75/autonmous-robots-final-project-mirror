@@ -22,7 +22,7 @@ include:
 
   - local: "templates/trigger.yml"
     inputs:
-      service: "robot-perception-service"
+      service: "robot-cone-perception-service"
       
   - local: "templates/trigger.yml"
     inputs:
@@ -30,7 +30,11 @@ include:
       
   - local: "templates/trigger.yml"
     inputs:
-      service: "robot-steering-service"
+      service: "robot-cone-steering-service"        
+      
+  - local: "templates/trigger.yml"
+    inputs:
+      service: "robot-papper-steering-service"
 
   - local: "templates/trigger.yml"
     inputs:

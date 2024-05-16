@@ -26,4 +26,4 @@ FROM alpine:3.19
 #        some-runtime-package
 
 COPY --from=builder /opt/out/ /usr
-ENTRYPOINT ["/usr/bin/robot-steering-service"]
+ENTRYPOINT ["/usr/bin/robot-papper-steering-service"]

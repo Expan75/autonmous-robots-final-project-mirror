@@ -7,8 +7,7 @@ RUN apk update && \
         cmake \
         g++ \
         make \
-        linux-headers \
-        opencv-dev
+        linux-headers
 
 ADD CMakeLists.txt FindCluonMsc.cmake /opt/sources/
 ADD src /opt/sources/src
@@ -22,19 +21,9 @@ RUN mkdir /opt/build /opt/out && \
 
 FROM alpine:3.19
 
-RUN apk update && \
-   apk --no-cache add \
-    libopencv_core \
-    libopencv_imgproc \
-    libopencv_highgui
-    # libopencv_video \
-    # libopencv_calib3d \
-    # libopencv_features2d \
-    # libopencv_objdetect \
-    # libopencv_highgui \
-    # libopencv_videoio \
-    # libopencv_flann
-    # py3-opencv
+#RUN apk update && \
+#    apk --no-cache add \
+#        some-runtime-package
 
 COPY --from=builder /opt/out/ /usr
-ENTRYPOINT ["/usr/bin/opendlv-perception-helloworld"]
+ENTRYPOINT ["/usr/bin/robot-cone-steering-service"]
