@@ -53,10 +53,10 @@ int32_t main(int32_t argc, char **argv)
     // Calculate steering
     steering = steering + aimDirection_dev / 180 * maxSteering;
     if ( steering >= maxSteering / 180 * 2*acos(0.0) ){
-      steering = maxSteering;
+      steering = maxSteering / 180 * 2*acos(0.0);
     }
     else if ( steering <= -maxSteering / 180 * 2*acos(0.0) ){
-      steering = -maxSteering;
+      steering = -maxSteering / 180 * 2*acos(0.0);
     }
 
     // Calculate pedal position
