@@ -88,78 +88,31 @@ int32_t main(int32_t argc, char **argv)
       // Interface to a running OD4 session; here, you can send and
       // receive messages.
       cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(cmd["cid"]))};
-
-      float yaw_mag{0.0f};
-      auto onMagneticFieldReading{[&yaw_mag](
-          cluon::data::Envelope &&envelope)
-        {
-          auto magReading = 
-            cluon::extractMessage<opendlv::proxy::MagneticFieldReading>(
-                std::move(envelope));
-          float mag_x = magReading.magneticFieldX();
-          float mag_y = magReading.magneticFieldY();
-          yaw_mag = std::atan2(mag_y,mag_x);
-        }};
-      od4.dataTrigger(opendlv::proxy::MagneticFieldReading::ID(),
-          onMagneticFieldReading);
       
-      float yaw_gyro{0.0f};
-      auto onAngularVelocityReading{[&yaw_gyro](
+      float steer_for_show{0.0f};
+      auto onGroundSteeringRequest{[&steer_for_show](
           cluon::data::Envelope &&envelope)
         {
-          auto angVelReading = 
-            cluon::extractMessage<opendlv::proxy::AngularVelocityReading>(
+          auto groundSteeringAngleRequest = 
+            cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(
                 std::move(envelope));
-          float deltaT = 0.01f;
-          yaw_gyro += angVelReading.angularVelocityZ()*deltaT;
+          steer_for_show = groundSteeringAngleRequest.groundSteering();
         }};
-      od4.dataTrigger(opendlv::proxy::AngularVelocityReading::ID(),
-        onAngularVelocityReading);
-        
-      float vX_acc{0.0f};
-      float vY_acc{0.0f};
-      float Y_acc{0.0f};
-      auto onAccelerationReading{[&vX_acc, &vY_acc, &Y_acc](
-          cluon::data::Envelope &&envelope)
-        {
-          auto accReading = 
-            cluon::extractMessage<opendlv::proxy::AccelerationReading>(
-                std::move(envelope));
-          float deltaT = 0.01f;
-          vX_acc += accReading.accelerationX()*deltaT;
-          vY_acc += accReading.accelerationY()*deltaT;
-          Y_acc += vY_acc*deltaT;
-        }};
-      od4.dataTrigger(opendlv::proxy::AccelerationReading::ID(),
-        onAccelerationReading);
 
-      double GPS_Lat{0};
-      double GPS_Long{0};
-      auto onGeodeticWgs84PositionReading{[&GPS_Lat, &GPS_Long](
+      float pedal_for_show{0.0f};
+      auto onPedalPositionRequest{[&pedal_for_show](
           cluon::data::Envelope &&envelope)
         {
-          auto GPSPostionReading = 
-            cluon::extractMessage<opendlv::proxy::GeodeticWgs84PositionReading>(
+          auto pedalPositionRequest = 
+            cluon::extractMessage<opendlv::proxy::PedalPositionRequest>(
                 std::move(envelope));
-          GPS_Lat = GPSPostionReading.latitude();
-          GPS_Long = GPSPostionReading.longitude();
+          pedal_for_show = pedalPositionRequest.position();
         }};
-      od4.dataTrigger(opendlv::proxy::GeodeticWgs84PositionReading::ID(),
-        onGeodeticWgs84PositionReading);
 
-      double GPS_Heading{0};
-      auto onGeodeticWgs84HeadingReading{[&GPS_Heading](
-          cluon::data::Envelope &&envelope)
-        {
-          auto GPSHeadingReading = 
-            cluon::extractMessage<opendlv::proxy::GeodeticWgs84HeadingReading>(
-                std::move(envelope));
-          GPS_Heading = GPSHeadingReading.northHeading();
-        }};
-      od4.dataTrigger(opendlv::proxy::GeodeticWgs84HeadingReading::ID(),
-        onGeodeticWgs84HeadingReading);
-      
-      // cv::Mat templ = cv::imread("/home/opendlv/data/Project/team11-project-monorepo/robot-perception-service/Cone_blue.png",cv::IMREAD_GRAYSCALE );
+      od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(),
+          onGroundSteeringRequest);
+      od4.dataTrigger(opendlv::proxy::PedalPositionRequest::ID(),
+          onPedalPositionRequest);
 
       // Endless loop; end the program by pressing Ctrl-C.
       while (od4.isRunning()) {
@@ -329,15 +282,9 @@ int32_t main(int32_t argc, char **argv)
         if (verbose){
           cv::line(img,cv::Point2f(img.cols / 2,img.rows),AimPt,cv::Scalar(0,255,0));
           cv::line(img,cv::Point2f(img.cols / 2,img.rows - 10),cv::Point2f(AimPt.x,img.rows - 10),cv::Scalar(0,0,255));
-          cv::putText(img, "Yaw Mag: " + std::to_string(yaw_mag / (2*std::acos(0.0)) * 180)
-          , cv::Point(img.cols / 2,img.rows - 100), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0,255,0));
-          cv::putText(img, "Yaw Gyro: " + std::to_string(yaw_gyro)
-          , cv::Point(img.cols / 2,img.rows - 80), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0,255,0));
-          cv::putText(img, "Velocity X: " + std::to_string(vX_acc)
-          , cv::Point(img.cols / 2,img.rows - 60), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0,255,0));
-          cv::putText(img, "Velocity Y: " + std::to_string(vY_acc)
+          cv::putText(img, "Pedal: " + std::to_string(pedal_for_show)
           , cv::Point(img.cols / 2,img.rows - 40), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0,255,0));
-          cv::putText(img, "Position Y: " + std::to_string(Y_acc)
+          cv::putText(img, "Steering: " + std::to_string(steer_for_show)
           , cv::Point(img.cols / 2,img.rows - 20), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0,255,0));  
 
           cv::imshow("Image: ", img);
