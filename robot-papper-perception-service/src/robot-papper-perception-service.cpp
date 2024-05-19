@@ -31,6 +31,7 @@ int32_t main(int32_t argc, char **argv)
               << "--cid=112 --name=img.argb --width=640 --height=480 --verbose"
               << std::endl;
   } else {
+    uint16_t const CID = std::stoi(cmd.at("cid"));
     std::string const name{cmd["name"]};
     uint32_t const width{static_cast<uint32_t>(std::stoi(cmd["width"]))};
     uint32_t const height{static_cast<uint32_t>(std::stoi(cmd["height"]))};
@@ -46,46 +47,33 @@ int32_t main(int32_t argc, char **argv)
 
       // Interface to a running OD4 session; here, you can send and
       // receive messages.
-      cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(cmd["cid"]))};
+      cluon::OD4Session od4{CID};
       
-      // Try to catch the position of the object and send out the acceleration and the turning angle
-      auto onDetectionProperty{[&od4, &verbose](cluon::data::Envelope &&envelope) {
-        auto const Dp =
-            cluon::extractMessage<opendlv::logic::perception::DetectionProperty>(
+      float steer_for_show{0.0f};
+      auto onGroundSteeringRequest{[&steer_for_show](
+          cluon::data::Envelope &&envelope)
+        {
+          auto groundSteeringAngleRequest = 
+            cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(
                 std::move(envelope));
+          steer_for_show = groundSteeringAngleRequest.groundSteering();
+        }};
 
-        std::string strPosition = Dp.property();
-        if (verbose) {
-          // std::cout << "Got object position " << strPosition << std::endl;
-        }
+      float pedal_for_show{0.0f};
+      auto onPedalPositionRequest{[&pedal_for_show](
+          cluon::data::Envelope &&envelope)
+        {
+          auto pedalPositionRequest = 
+            cluon::extractMessage<opendlv::proxy::PedalPositionRequest>(
+                std::move(envelope));
+          pedal_for_show = pedalPositionRequest.position();
+        }};
 
-        size_t comma_index = strPosition.find(";");
-        float center_x = std::stof(strPosition.substr(0,comma_index));
-        float center_y = std::stof(strPosition.substr(comma_index+1,strPosition.length()-1));
+      od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(),
+          onGroundSteeringRequest);
+      od4.dataTrigger(opendlv::proxy::PedalPositionRequest::ID(),
+          onPedalPositionRequest);
 
-        // Calculate the angle need to turn and send it range: + 38 to - 38 degree
-        cv::Point2f RefPt = cv::Point2f(640 / 2, 480);    
-        float AngleDisplay;
-        float Angle = std::atan2(RefPt.x - center_x, RefPt.y - center_y);
-        AngleDisplay = Angle;
-        Angle = Angle * 38 / 90; // Normalize to 38 degree
-        opendlv::proxy::GroundSteeringRequest gsr;
-        gsr.groundSteering(Angle);
-        od4.send(gsr);
-
-        // Calculate the acc need to implement and send it range: +0.25 (forward) .. -1.0 (backwards)
-        double dist = std::sqrt(std::pow(RefPt.x - center_x, 2) + std::pow(RefPt.y - center_y, 2));
-        double farestDist = std::sqrt(std::pow(640, 2) + std::pow(480, 2));
-        double distDeviation = dist / farestDist * 0.025; // Normalize to 0.025(Use 1/10 of the max speed)
-        opendlv::proxy::PedalPositionRequest ppr;
-        ppr.position(static_cast<float>(distDeviation));
-        od4.send(ppr); 
-        // std::cout << "Got object position x:" << RefPt.x - center_x << " ,y: " << RefPt.y - center_y << std::endl;
-        std::cout << "Angle Turn:" << AngleDisplay << " , Acc: " << distDeviation << std::endl;
-      }};
-
-      od4.dataTrigger(
-      opendlv::logic::perception::DetectionProperty::ID(), onDetectionProperty);
 
       // Endless loop; end the program by pressing Ctrl-C.
       while (od4.isRunning()) {
@@ -106,23 +94,21 @@ int32_t main(int32_t argc, char **argv)
           img = wrapped.clone();
         }
         sharedMemory->unlock();
-
-        // TODO: Do something with the frame.    
-        // Sharpening the image first
-        double alpha = 2; /*< Simple contrast control */
-        double beta = 1; /*< Simple brightness control */
-        cv::Mat sharpenImage;
-        img.convertTo(sharpenImage, -1, alpha, beta); 
-        // cv::imshow("Sharpen Image", sharpenImage);
+        // cv::imshow("Blue papper contour", img); 
 
         // Turn the color to HSV
         cv::Mat hsv;
-        cv::cvtColor(sharpenImage, hsv, cv::COLOR_BGR2HSV);
+        cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
+
+        // Specify rectangle area
+        cv::Rect roi(0,hsv.rows / 2,hsv.cols,hsv.rows / 2);
+
+        // Create krenel for morphology process
+        cv::Mat element = getStructuringElement( cv::MORPH_RECT , cv::Size( 3,3 ), cv::Point( 0,0 ) );
 
         // Extract the blue papper
         cv::Mat bC_papper;
-        cv::inRange(hsv, cv::Scalar(110,50,50), cv::Scalar(130,255,255), bC_papper);  
-        cv::Mat element = getStructuringElement( cv::MORPH_RECT , cv::Size( 3,3 ), cv::Point( 0,0 ) );
+        cv::inRange(hsv(roi), cv::Scalar(100,37,77), cv::Scalar(130,150,150), bC_papper); // blue papper
         cv::morphologyEx( bC_papper, bC_papper, cv::MORPH_CLOSE , element );
         cv::dilate(bC_papper,bC_papper,element, cv::Point(-1,-1),3,1,1);
         
@@ -130,59 +116,140 @@ int32_t main(int32_t argc, char **argv)
         std::vector<std::vector<cv::Point>> contours_blue;
         cv::findContours(bC_papper, contours_blue, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
+        // Extract the green papper
+        cv::Mat gC_papper;
+        cv::inRange(hsv(roi), cv::Scalar(25,88,115), cv::Scalar(35,204,230), gC_papper);  // green papper
+        cv::morphologyEx( gC_papper, gC_papper, cv::MORPH_CLOSE , element );
+        cv::dilate(gC_papper,gC_papper,element, cv::Point(-1,-1),3,1,1);
+        
+        // Find the contour of the extract papper image
+        std::vector<std::vector<cv::Point>> contours_green;
+        cv::findContours(gC_papper, contours_green, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
         // Iterate over all contours to find the blue papper
         std::vector<cv::Point> PapperContour;   
-        std::vector<cv::Point> ContourCompare{cv::Point(55, 231), cv::Point(73, 376), cv::Point(152, 382), cv::Point(300, 340), cv::Point(286, 225)};
-        cv::Point2f centerPt = cv::Point2f(img.cols / 2, img.rows);
+        cv::Point2f centerPt_blue = cv::Point2f(0.0f, 0.0f);
+        int bsizeCount = 0;
         for ( std::size_t i = 0; i < contours_blue.size(); i++ )
         {        
-          cv::Moments M = cv::moments(contours_blue[i]);
+          // Approximate a poly shape
+          cv::approxPolyDP(contours_blue[i],PapperContour,cv::arcLength(contours_blue[i],true)*0.02,true);
+          
+          std::vector<cv::Point> Hull;
+          cv::convexHull(PapperContour,Hull);
+          cv::Moments M = cv::moments(Hull);
           float center_x = static_cast<float>(M.m10 / (M.m00 + 1e-5));
           float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
 
-          // Approximate a poly shape
-          cv::approxPolyDP(contours_blue[i],PapperContour,cv::arcLength(contours_blue[i],true)*0.02,true);
+          if ( cv::arcLength(Hull,true) < 100 && static_cast<float>(roi.height) - center_y <= 150.0f ){
+            cv::polylines(img(roi), Hull, true, cv::Scalar(0,0,255));
+            continue;
+          }
+
+          // Ignore car 
+          if ( static_cast<float>(roi.height) - center_y <= 127.0f && static_cast<float>(roi.width) / 2.0f - center_x <= 170.0f && static_cast<float>(roi.width) / 2.0f - center_x > 0.0f ){
+            // cv::polylines(img(roi), Hull, true, cv::Scalar(0,255,0));
+            continue;
+          }
+          
+          if ( static_cast<float>(roi.height) - center_y <= 25.0f ){
+            // cv::polylines(img(roi), Hull, true, cv::Scalar(255,255,0));
+            continue;
+          }
 
           // Draw the blue papper
-          cv::polylines(img, PapperContour, true, cv::Scalar(0, 255, 0), 2);
+          cv::putText(img(roi), std::to_string(center_x) + ", "+ std::to_string(center_y),cv::Point2f(center_x,center_y),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::polylines(img(roi), Hull, true, cv::Scalar(255, 0, 0), 2);
 
-          // Ignore too small contour
-          if (cv::contourArea(PapperContour) <=2500 && (std::fabs(center_x) <= img.cols / 5.0f || std::fabs(center_x - img.cols) <= img.cols / 5.0f) ){
-            cv::polylines(img, PapperContour, true, cv::Scalar(128, 0, 128), 2);
+          // Record center point
+          centerPt_blue.x += center_x;
+          centerPt_blue.y += center_y;
+          bsizeCount++;
+        }
+
+        if (bsizeCount == 0){
+          centerPt_blue = cv::Point2f(hsv.cols / 2, hsv.rows); // Reset center point
+        }
+        else{
+          centerPt_blue.x = centerPt_blue.x / bsizeCount;
+          centerPt_blue.y = centerPt_blue.y / bsizeCount + hsv.rows / 2;
+          cv::line(img,cv::Point2f(img.cols / 2,img.rows),centerPt_blue,cv::Scalar(255,0,0));
+        }
+
+        cv::Point2f centerPt_green = cv::Point2f(0.0f, 0.0f);
+        int gsizeCount = 0;
+        for ( std::size_t i = 0; i < contours_green.size(); i++ )
+        {        
+          // Approximate a poly shape
+          cv::approxPolyDP(contours_green[i],PapperContour,cv::arcLength(contours_green[i],true)*0.02,true);
+          
+          std::vector<cv::Point> Hull;
+          cv::convexHull(PapperContour,Hull);
+          cv::Moments M = cv::moments(Hull);
+          float center_x = static_cast<float>(M.m10 / (M.m00 + 1e-5));
+          float center_y = static_cast<float>(M.m01 / (M.m00 + 1e-5));
+
+          if ( cv::arcLength(Hull,true) < 50 && static_cast<float>(roi.height) - center_y <= 150.0f ){
+            cv::polylines(img(roi), Hull, true, cv::Scalar(0,0,255));
             continue;
           }
 
-          // Ignore too large contour
-          // if (cv::contourArea(PapperContour) >40000 ){
-          //   cv::polylines(img, PapperContour, true, cv::Scalar(0, 0, 128), 2);
-          //   continue;
-          // }
-
-          // Ignore when the contour stay really close to the bottom border
-          if (std::fabs(center_y - img.rows) <= img.rows / 4.0f || std::fabs(center_y) <= img.rows / 4.0f ){
-            cv::polylines(img, PapperContour, true, cv::Scalar(0, 255, 255), 2);
+          // Ignore car 
+          if ( static_cast<float>(roi.height) - center_y <= 127.0f && static_cast<float>(roi.width) / 2.0f - center_x <= 170.0f && static_cast<float>(roi.width) / 2.0f - center_x > 0.0f ){
+            // cv::polylines(img(roi), Hull, true, cv::Scalar(0,255,0));
+            continue;
+          }
+          
+          if ( static_cast<float>(roi.height) - center_y <= 25.0f ){
+            // cv::polylines(img(roi), Hull, true, cv::Scalar(255,255,0));
             continue;
           }
 
-          if (cv::arcLength(PapperContour,true) >= 200 && cv::matchShapes(ContourCompare,PapperContour,cv::CONTOURS_MATCH_I1,0.0) >= 0.3){
-            cv::polylines(img, PapperContour, true, cv::Scalar(0, 0, 255), 2);
-            centerPt = cv::Point2f(center_x , center_y);
-            break;
-          }
+          // Draw the green papper
+          cv::putText(img(roi), std::to_string(center_x) + ", "+ std::to_string(center_y),cv::Point2f(center_x,center_y),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::polylines(img(roi), Hull, true, cv::Scalar(0, 255, 0), 2);
+
+          // Record center point
+          centerPt_green.x += center_x;
+          centerPt_green.y += center_y;
+          gsizeCount++;
+        }
+
+        if (gsizeCount == 0){
+          centerPt_green = cv::Point2f(hsv.cols / 2, hsv.rows); // Reset center point
+        }
+        else{
+          centerPt_green.x = centerPt_green.x / gsizeCount;
+          centerPt_green.y = centerPt_green.y / gsizeCount + hsv.rows / 2;
+          cv::line(img,cv::Point2f(img.cols / 2,img.rows),centerPt_green,cv::Scalar(0,255,0));
         }
 
         // Show the result
         if (verbose){
-          cv::imshow("Blue papper contour", img);
+          cv::putText(img, "pedal: "+ std::to_string(pedal_for_show),cv::Point2f(img.cols / 2,img.rows - 40),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::putText(img, "steering: "+ std::to_string(steer_for_show),cv::Point2f(img.cols / 2,img.rows - 20),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::imshow("Blue/Green papper contour", img);
           // cv::imshow("Result", img);
           cv::waitKey(1);
         }
 
         // Send message to another microservice
         opendlv::logic::perception::DetectionProperty message;
+        float dist = (gsizeCount != 0) ? 
+        std::sqrt(std::pow(img.cols / 2 - centerPt_green.x,2.0f) + std::pow(img.rows - centerPt_green.y,2.0f))
+        : -1.0f;
+        float aimDirection = std::atan2(img.cols / 2 - centerPt_green.x,img.rows - centerPt_green.y); //Direction in rad
         message.sampleId(0); //0 stands for the papper
-        message.detectionId(1); //0 stands for yellow, 1 for blue
-        message.property(std::to_string(centerPt.x) + ";" + std::to_string(centerPt.y)); //property stands for the position
+        message.detectionId(0); //0 stands for green, 1 for blue
+        message.property(std::to_string(dist) + ";" + std::to_string(aimDirection)); //property stands for dist / angle
+        od4.send(message);
+        dist = (bsizeCount != 0) ? 
+        std::sqrt(std::pow(img.cols / 2 - centerPt_blue.x,2.0f) + std::pow(img.rows - centerPt_blue.y,2.0f))
+        : -1.0f;
+        aimDirection = std::atan2(img.cols / 2 - centerPt_blue.x,img.rows - centerPt_blue.y); //Direction in rad
+        message.sampleId(0); //0 stands for the papper
+        message.detectionId(1); //0 stands for green, 1 for blue
+        message.property(std::to_string(dist) + ";" + std::to_string(aimDirection)); //property stands for dist / angle
         od4.send(message);
       }
     }
