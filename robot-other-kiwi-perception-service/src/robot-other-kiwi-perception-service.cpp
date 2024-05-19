@@ -47,46 +47,31 @@ int32_t main(int32_t argc, char **argv)
       // Interface to a running OD4 session; here, you can send and
       // receive messages.
       cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(cmd["cid"]))};
-      
-      // Try to catch the position of the object and send out the acceleration and the turning angle
-      auto onDetectionProperty{[&od4, &verbose](cluon::data::Envelope &&envelope) {
-        auto const Dp =
-            cluon::extractMessage<opendlv::logic::perception::DetectionProperty>(
+
+      float steer_for_show{0.0f};
+      auto onGroundSteeringRequest{[&steer_for_show](
+          cluon::data::Envelope &&envelope)
+        {
+          auto groundSteeringAngleRequest = 
+            cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(
                 std::move(envelope));
+          steer_for_show = groundSteeringAngleRequest.groundSteering();
+        }};
 
-        std::string strPosition = Dp.property();
-        if (verbose) {
-          // std::cout << "Got object position " << strPosition << std::endl;
-        }
+      float pedal_for_show{0.0f};
+      auto onPedalPositionRequest{[&pedal_for_show](
+          cluon::data::Envelope &&envelope)
+        {
+          auto pedalPositionRequest = 
+            cluon::extractMessage<opendlv::proxy::PedalPositionRequest>(
+                std::move(envelope));
+          pedal_for_show = pedalPositionRequest.position();
+        }};
 
-        size_t comma_index = strPosition.find(";");
-        float center_x = std::stof(strPosition.substr(0,comma_index));
-        float center_y = std::stof(strPosition.substr(comma_index+1,strPosition.length()-1));
-        cv::Point2f RefPt = cv::Point2f(1280 / 2, 720);    
-
-        // Calculate the acc need to implement and send it range: +0.25 (forward) .. -1.0 (backwards)
-        double dist = std::sqrt(std::pow(RefPt.x - center_x, 2) + std::pow(RefPt.y - center_y, 2));
-        // double farestDist = std::sqrt(std::pow(1280 / 2, 2) + std::pow(720, 2));
-        double distDeviation = (dist - 420) / 420 * 0.45 + 0.45;
-        opendlv::proxy::PedalPositionRequest ppr;
-        ppr.position(static_cast<float>(distDeviation));
-        od4.send(ppr);      
-        
-        // Calculate the angle need to turn and send it range: + 38 to - 38 degree
-        // float AngleDisplay;
-        float Angle = std::atan2(RefPt.x - center_x, RefPt.y - center_y);
-        // AngleDisplay = Angle;
-        Angle = Angle * 30 / 90; // Normalize to 30 degree to avoid saturation
-        opendlv::proxy::GroundSteeringRequest gsr;
-        gsr.groundSteering(Angle);
-        od4.send(gsr);
-
-        // std::cout << "Got object position x:" << RefPt.x - center_x << " ,y: " << RefPt.y - center_y << std::endl;
-        std::cout << "Angle Turn:" << Angle / 3.14 * 180 << " , Acc: " << distDeviation << std::endl;
-      }};
-
-      od4.dataTrigger(
-      opendlv::logic::perception::DetectionProperty::ID(), onDetectionProperty);
+      od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(),
+          onGroundSteeringRequest);
+      od4.dataTrigger(opendlv::proxy::PedalPositionRequest::ID(),
+          onPedalPositionRequest);
 
       // Endless loop; end the program by pressing Ctrl-C.
       while (od4.isRunning()) {
@@ -153,19 +138,24 @@ int32_t main(int32_t argc, char **argv)
         AimPt = (nCounter == 0) ? cv::Point2f(img.cols / 2, img.rows) : cv::Point2f(AimPt.x / nCounter, AimPt.y / nCounter);
 
         cv::line(img,cv::Point2f(img.cols / 2,img.rows),AimPt,cv::Scalar(0,255,0));
-        cv::imshow("detected circles", img);
 
         // Show the result
         if (verbose){
+          cv::putText(img, "pedal: "+ std::to_string(pedal_for_show),cv::Point2f(img.cols / 2,img.rows - 40),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::putText(img, "steering: "+ std::to_string(steer_for_show),cv::Point2f(img.cols / 2,img.rows - 20),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::imshow("detected circles", img);
           // cv::imshow("Result", img);
           cv::waitKey(1);
         }
 
         // Send message to another microservice
         opendlv::logic::perception::DetectionProperty message;
+        float dist = (nCounter != 0) ? 
+        std::sqrt(std::pow(img.cols / 2 - AimPt.x,2.0f) + std::pow(img.rows - AimPt.y,2.0f)): -1.0f;
+        float aimDirection = std::atan2(img.cols / 2 - AimPt.x,img.rows - AimPt.y); //Direction in rad
         message.sampleId(0); //0 stands for the papper
-        message.detectionId(1); //0 stands for yellow, 1 for blue
-        message.property(std::to_string(AimPt.x) + ";" + std::to_string(AimPt.y)); //property stands for the position
+        message.detectionId(0); //0 stands for circles
+        message.property(std::to_string(dist) + ";" + std::to_string(aimDirection)); //property stands for the dist and aimdirection
         od4.send(message);
       }
     }
