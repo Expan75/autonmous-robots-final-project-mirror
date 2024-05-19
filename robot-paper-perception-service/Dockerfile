@@ -37,4 +37,4 @@ RUN apk update && \
     # py3-opencv
 
 COPY --from=builder /opt/out/ /usr
-ENTRYPOINT ["/usr/bin/robot-papper-perception-service"]
+ENTRYPOINT ["/usr/bin/robot-paper-perception-service"]
