@@ -26,7 +26,11 @@ include:
       
   - local: "templates/trigger.yml"
     inputs:
-      service: "robot-paper-perception-service"          
+      service: "robot-paper-perception-service"    
+
+  - local: "templates/trigger.yml"
+    inputs:
+      service: "robot-other-kiwi-perception-service"          
       
   - local: "templates/trigger.yml"
     inputs:
@@ -35,6 +39,10 @@ include:
   - local: "templates/trigger.yml"
     inputs:
       service: "robot-paper-steering-service"
+
+  - local: "templates/trigger.yml"
+    inputs:
+      service: "robot-other-kiwi-steering-service"
 
   - local: "templates/trigger.yml"
     inputs:
