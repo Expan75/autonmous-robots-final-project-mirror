@@ -74,6 +74,46 @@ int32_t main(int32_t argc, char **argv)
       od4.dataTrigger(opendlv::proxy::PedalPositionRequest::ID(),
           onPedalPositionRequest);
 
+      std::mutex distancesMutex;
+      float front{0};
+      float rear{0};
+      float left{0};
+      float right{0};
+      bool isDistEventTriggered = false;
+      auto onDistance = [&distancesMutex, &front, &rear, &left, &right, &isDistEventTriggered](
+                          cluon::data::Envelope &&env) {
+      auto senderStamp = env.senderStamp();
+      // Now, we unpack the cluon::data::Envelope to get the desired
+      // DistanceReading.
+      opendlv::proxy::DistanceReading dr =
+          cluon::extractMessage<opendlv::proxy::DistanceReading>(
+              std::move(env));
+
+      // Store distance readings.
+      std::lock_guard<std::mutex> lck(distancesMutex);
+      switch (senderStamp) {
+        case 0:
+          front = dr.distance();
+          break;
+        case 2:
+          rear = dr.distance();
+          break;
+        case 1:
+          left = dr.distance();
+          break;
+        case 3:
+          right = dr.distance();
+          break;
+        }
+        // std::cout << "Distance front: " << front 
+        //           << ", Distance rear: " << rear
+        //           << ", Distance left: " << left
+        //           << ", Distance right: " << right << std::endl;
+        isDistEventTriggered = true;
+      };
+      // Finally, we register our lambda for the message identifier for
+      // opendlv::proxy::DistanceReading.
+      od4.dataTrigger(opendlv::proxy::DistanceReading::ID(), onDistance);
 
       // Endless loop; end the program by pressing Ctrl-C.
       while (od4.isRunning()) {
@@ -226,6 +266,10 @@ int32_t main(int32_t argc, char **argv)
 
         // Show the result
         if (verbose){
+          cv::putText(img, "front: "+ std::to_string(front),cv::Point2f(img.cols / 2,img.rows - 120),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::putText(img, "back: "+ std::to_string(rear),cv::Point2f(img.cols / 2,img.rows - 100),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::putText(img, "left: "+ std::to_string(left),cv::Point2f(img.cols / 2,img.rows - 80),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
+          cv::putText(img, "right: "+ std::to_string(right),cv::Point2f(img.cols / 2,img.rows - 60),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
           cv::putText(img, "pedal: "+ std::to_string(pedal_for_show),cv::Point2f(img.cols / 2,img.rows - 40),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
           cv::putText(img, "steering: "+ std::to_string(steer_for_show),cv::Point2f(img.cols / 2,img.rows - 20),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
           cv::imshow("Blue/Green papper contour", img);
