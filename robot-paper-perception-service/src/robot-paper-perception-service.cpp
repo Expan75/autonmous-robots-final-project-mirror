@@ -37,6 +37,20 @@ int32_t main(int32_t argc, char **argv)
     uint32_t const height{static_cast<uint32_t>(std::stoi(cmd["height"]))};
     bool const verbose{cmd.count("verbose") != 0};
 
+    int hBlueLow = (cmd.count("hBlueLow") != 0) ? std::stoi(cmd["hBlueLow"]) : 100;
+    int sBlueLow = (cmd.count("sBlueLow") != 0) ? std::stoi(cmd["sBlueLow"]) : 37;
+    int vBlueLow = (cmd.count("vBlueLow") != 0) ? std::stoi(cmd["vBlueLow"]) : 77;
+    int hGreenLow = (cmd.count("hGreenLow") != 0) ? std::stoi(cmd["hGreenLow"]) : 25;
+    int sGreenLow = (cmd.count("sGreenLow") != 0) ? std::stoi(cmd["sGreenLow"]) : 88;
+    int vGreenLow = (cmd.count("vGreenLow") != 0) ? std::stoi(cmd["vGreenLow"]) : 115;
+    
+    int hBlueHigh = (cmd.count("hBlueHigh") != 0) ? std::stoi(cmd["hBlueHigh"]) : 130;
+    int sBlueHigh = (cmd.count("sBlueHigh") != 0) ? std::stoi(cmd["sBlueHigh"]) : 150;
+    int vBlueHigh = (cmd.count("vBlueHigh") != 0) ? std::stoi(cmd["vBlueHigh"]) : 150;
+    int hGreenHigh = (cmd.count("hGreenHigh") != 0) ? std::stoi(cmd["hGreenHigh"]) : 35;
+    int sGreenHigh = (cmd.count("sGreenHigh") != 0) ? std::stoi(cmd["sGreenHigh"]) : 204;
+    int vGreenHigh = (cmd.count("vGreenHigh") != 0) ? std::stoi(cmd["vGreenHigh"]) : 230;
+
     // Attach to the shared memory.
     std::unique_ptr<cluon::SharedMemory> sharedMemory{
         new cluon::SharedMemory{name}};
@@ -148,7 +162,7 @@ int32_t main(int32_t argc, char **argv)
 
         // Extract the blue papper
         cv::Mat bC_papper;
-        cv::inRange(hsv(roi), cv::Scalar(100,37,77), cv::Scalar(130,150,150), bC_papper); // blue papper
+        cv::inRange(hsv(roi), cv::Scalar(hBlueLow,sBlueLow,vBlueLow), cv::Scalar(hBlueHigh,sBlueHigh,vBlueHigh), bC_papper); // blue papper
         cv::morphologyEx( bC_papper, bC_papper, cv::MORPH_CLOSE , element );
         cv::dilate(bC_papper,bC_papper,element, cv::Point(-1,-1),3,1,1);
         
@@ -158,7 +172,7 @@ int32_t main(int32_t argc, char **argv)
 
         // Extract the green papper
         cv::Mat gC_papper;
-        cv::inRange(hsv(roi), cv::Scalar(25,88,115), cv::Scalar(35,204,230), gC_papper);  // green papper
+        cv::inRange(hsv(roi), cv::Scalar(hGreenLow,sGreenLow,vGreenLow), cv::Scalar(hGreenHigh,sGreenHigh,vGreenHigh), gC_papper);  // green papper
         cv::morphologyEx( gC_papper, gC_papper, cv::MORPH_CLOSE , element );
         cv::dilate(gC_papper,gC_papper,element, cv::Point(-1,-1),3,1,1);
         

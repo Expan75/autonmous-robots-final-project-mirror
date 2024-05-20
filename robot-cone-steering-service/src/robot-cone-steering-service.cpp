@@ -26,6 +26,14 @@ int32_t main(int32_t argc, char **argv)
   float minPedalPosition = (cmd.count("minPed") != 0) ? std::stof(cmd["minPed"]) : 0.6f;
   int maxSteering = (cmd.count("maxSter") != 0) ? std::stoi(cmd["maxSter"]) : 38;
   float maxAngle = maxSteering / static_cast<float>(180)* static_cast<float>(2*acos(0.0));
+  float angDevRagSmall = (cmd.count("angDevRagSmall") != 0) ? std::stof(cmd["angDevRagSmall"]) : 0.2f;
+  float angDevRagMid = (cmd.count("angDevRagMid") != 0) ? std::stof(cmd["angDevRagMid"]) : 0.5f;
+  float angMidRange = (cmd.count("angMidRange") != 0) ? std::stof(cmd["angMidRange"]) : 0.15f;
+  float midRangeAcc = (cmd.count("midRangeAcc") != 0) ? std::stof(cmd["midRangeAcc"]) : 0.05f;
+  float otherRangeAcc = (cmd.count("otherRangeAcc") != 0) ? std::stof(cmd["otherRangeAcc"]) : 0.01f;
+  float midRangeDcc = (cmd.count("midRangeDcc") != 0) ? std::stof(cmd["midRangeDcc"]) : 0.03f;
+  float otherRangeDcc = (cmd.count("otherRangeDcc") != 0) ? std::stof(cmd["otherRangeDcc"]) : 0.05f;
+  float maxMinRatio = (cmd.count("maxMinRatio") != 0) ? std::stof(cmd["maxMinRatio"]) : 0.6f;
 
   cluon::OD4Session od4(cid);
 
@@ -67,38 +75,38 @@ int32_t main(int32_t argc, char **argv)
     else if ( steering <= -maxAngle ){
       steering = -maxAngle;
     }
-    std::cout << "Steering: " << steering << std::endl;
-    std::cout << "Aim Direction dev: " << aimDirection_dev << std::endl;
-    std::cout << "Aim Direction current: " << aimDirection_cur << std::endl;
+    // std::cout << "Steering: " << steering << std::endl;
+    // std::cout << "Aim Direction dev: " << aimDirection_dev << std::endl;
+    // std::cout << "Aim Direction current: " << aimDirection_cur << std::endl;
 
     // Calculate pedal position
     // speed up if the deviation of the angle is not too large
-    if ( std::fabs(aimDirection_dev) < 0.2 ){
-      if ( std::fabs(aimDirection_cur) < 0.15 ){
+    if ( std::fabs(aimDirection_dev) < angDevRagSmall ){
+      if ( std::fabs(aimDirection_cur) < angMidRange ){
       // Speed up the pedal position
-        pedal += 0.05f;
+        pedal += midRangeAcc;
         if ( pedal >= maxPedalPosition ){
           pedal = maxPedalPosition;
         }
       }
       else{
         // Speed up the pedal position a bit
-        pedal += 0.01f;
-        if ( pedal >= (maxPedalPosition - minPedalPosition) * 0.6f + minPedalPosition ){
-          pedal = (maxPedalPosition - minPedalPosition) * 0.6f + minPedalPosition ;
+        pedal += otherRangeAcc;
+        if ( pedal >= (maxPedalPosition - minPedalPosition) * maxMinRatio + minPedalPosition ){
+          pedal = (maxPedalPosition - minPedalPosition) * maxMinRatio + minPedalPosition ;
         }
       }
     }    
-    else if ( std::fabs(aimDirection_dev) < 0.5 ){ // Slow down abit while the deviation is a bit large
+    else if ( std::fabs(aimDirection_dev) < angDevRagMid ){ // Slow down abit while the deviation is a bit large
       // slow down the pedal position
-      pedal -= 0.03f;
+      pedal -= midRangeDcc;
       if ( pedal <= minPedalPosition ){
         pedal = minPedalPosition;
       }
     } 
     else{ // Slow down while the deviation is large
       // slow down the pedal position
-      pedal -= 0.05f;
+      pedal -= otherRangeDcc;
       if ( pedal <= minPedalPosition ){
         pedal = minPedalPosition;
       }

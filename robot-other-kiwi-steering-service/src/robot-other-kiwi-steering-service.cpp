@@ -30,6 +30,7 @@ int32_t main(int32_t argc, char **argv)
   float minRearDist = (cmd.count("minRear") != 0) ? std::stof(cmd["minRear"]) : 0.2f;
   float minLeftDist = (cmd.count("minLeft") != 0) ? std::stof(cmd["minLeft"]) : 0.2f;
   float minRightDist = (cmd.count("minRight") != 0) ? std::stof(cmd["minRight"]) : 0.2f;
+  float maxDist = (cmd.count("maxDist") != 0) ? std::stof(cmd["maxDist"]) : 300.0f;
   float minDist = (cmd.count("minDist") != 0) ? std::stof(cmd["minDist"]) : 150.0f;
 
   cluon::OD4Session od4(cid);
@@ -96,8 +97,8 @@ int32_t main(int32_t argc, char **argv)
     onDetectionPropertyReading);
 
   float pedal{minPedalPosition}, steering{0.0f};
-  int nFrontGoBackCount = 0;
-  int nBackGoFrontCount = 0;
+  int nFrontGoBackCount = 1;
+  int nBackGoFrontCount = 1;
   int nAvoidCollisionCount = 0;
   while (od4.isRunning())
   {
@@ -251,7 +252,7 @@ int32_t main(int32_t argc, char **argv)
       }
 
       // Setup pedal
-      pedal = (dist_kiwi - minDist) / (300.0f - minDist) * (maxPedalPosition - minPedalPosition) + minPedalPosition; // Go front
+      pedal = (dist_kiwi - minDist) / (maxDist - minDist) * (maxPedalPosition - minPedalPosition) + minPedalPosition; // Go front
       if ( pedal >= maxPedalPosition ){
         pedal = maxPedalPosition;
       }

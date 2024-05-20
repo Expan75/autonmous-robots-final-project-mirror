@@ -77,6 +77,20 @@ int32_t main(int32_t argc, char **argv)
     uint32_t const height{static_cast<uint32_t>(std::stoi(cmd["height"]))};
     bool const verbose{cmd.count("verbose") != 0};
 
+    int hBlueLow = (cmd.count("hBlueLow") != 0) ? std::stoi(cmd["hBlueLow"]) : 80;
+    int sBlueLow = (cmd.count("sBlueLow") != 0) ? std::stoi(cmd["sBlueLow"]) : 0;
+    int vBlueLow = (cmd.count("vBlueLow") != 0) ? std::stoi(cmd["vBlueLow"]) : 0;
+    int hYellowLow = (cmd.count("hYellowLow") != 0) ? std::stoi(cmd["hYellowLow"]) : 20;
+    int sYellowLow = (cmd.count("sYellowLow") != 0) ? std::stoi(cmd["sYellowLow"]) : 195;
+    int vYellowLow = (cmd.count("vYellowLow") != 0) ? std::stoi(cmd["vYellowLow"]) : 110;
+    
+    int hBlueHigh = (cmd.count("hBlueHigh") != 0) ? std::stoi(cmd["hBlueHigh"]) : 180;
+    int sBlueHigh = (cmd.count("sBlueHigh") != 0) ? std::stoi(cmd["sBlueHigh"]) : 200;
+    int vBlueHigh = (cmd.count("vBlueHigh") != 0) ? std::stoi(cmd["vBlueHigh"]) : 60;
+    int hYellowHigh = (cmd.count("hYellowHigh") != 0) ? std::stoi(cmd["hYellowHigh"]) : 30;
+    int sYellowHigh = (cmd.count("sYellowHigh") != 0) ? std::stoi(cmd["sYellowHigh"]) : 255;
+    int vYellowHigh = (cmd.count("vYellowHigh") != 0) ? std::stoi(cmd["vYellowHigh"]) : 255;
+
     // Attach to the shared memory.
     std::unique_ptr<cluon::SharedMemory> sharedMemory{
         new cluon::SharedMemory{name}};
@@ -141,14 +155,15 @@ int32_t main(int32_t argc, char **argv)
         cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
 
         cv::Rect roi(0, hsv.rows / 2 , hsv.cols, hsv.rows / 2 );
+        // cv::Rect roi(0, hsv.rows * 7 / 12 , hsv.cols, hsv.rows * 5 / 12 ); // For DODO Test
         // cv::Rect roi_center(hsv.cols / 4, hsv.rows * 5 / 9, hsv.cols / 2, hsv.rows /9);
         // hsv = hsv(roi);
 
         // Extract the yellow and blue cones out of the image
         cv::Mat yC_sharpen;
         cv::Mat bC_sharpen;
-        cv::inRange(hsv(roi), cv::Scalar(20,195,110), cv::Scalar(30,255,255), yC_sharpen);    // For yellow cones
-        cv::inRange(hsv(roi), cv::Scalar(80,0,0), cv::Scalar(180,200,60), bC_sharpen);  // For blue cones
+        cv::inRange(hsv(roi), cv::Scalar(hYellowLow,sYellowLow,vYellowLow), cv::Scalar(hYellowHigh,sYellowHigh,vYellowHigh), yC_sharpen);    // For yellow cones
+        cv::inRange(hsv(roi), cv::Scalar(hBlueLow,sBlueLow,vBlueLow), cv::Scalar(hBlueHigh,sBlueHigh,vBlueHigh), bC_sharpen);  // For blue cones
         // cv::inRange(hsv(roi), cv::Scalar(25,245,245), cv::Scalar(35,255,255), yC_sharpen);    // For yellow cones of DODO test SIL
         // cv::inRange(hsv(roi), cv::Scalar(115,245,245), cv::Scalar(125,255,255), bC_sharpen);  // For blue cones of DODO test SIL
         cv::Mat element = getStructuringElement( cv::MORPH_RECT , cv::Size( 3,3 ), cv::Point( 0,0 ) );
