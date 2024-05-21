@@ -32,6 +32,8 @@ int32_t main(int32_t argc, char **argv)
   float minRightDist = (cmd.count("minRight") != 0) ? std::stof(cmd["minRight"]) : 0.2f;
   float maxDist = (cmd.count("maxDist") != 0) ? std::stof(cmd["maxDist"]) : 300.0f;
   float minDist = (cmd.count("minDist") != 0) ? std::stof(cmd["minDist"]) : 150.0f;
+  int avoidCount = (cmd.count("avoidCount") != 0) ? std::stoi(cmd["avoidCount"]) : 10;
+  bool isCollisionAvoidanceMode = (cmd.count("Col") != 0) ? std::stoi(cmd["Col"]) : true;
 
   cluon::OD4Session od4(cid);
 
@@ -90,8 +92,6 @@ int32_t main(int32_t argc, char **argv)
       aimDirection_kiwi = std::stof(strPosition.substr(comma_index+1,strPosition.length()-1));
     }
     isDetectionEventTriggered = true;
-    // std::cout << "Distance to blue papper: " << dist_b_papper 
-    //           << "Angle to blue papper: " << aimDirection_b_papper << std::endl;
   }};
   od4.dataTrigger(opendlv::logic::perception::DetectionProperty::ID(),
     onDetectionPropertyReading);
@@ -119,29 +119,29 @@ int32_t main(int32_t argc, char **argv)
     opendlv::proxy::PedalPositionRequest ppr;
 
     // Collision avoidance    
-    if ( false &&( left < minLeftDist || right < minRightDist || front < minFrontDist || rear < minRearDist) ){
+    if ( isCollisionAvoidanceMode &&( left < minLeftDist || right < minRightDist || front < minFrontDist || rear < minRearDist) ){
       // Set avoid collision count to 1
       nAvoidCollisionCount = 1;
 
       // Too close to front
       if ( front < minFrontDist ){
         if( left < minLeftDist ){
-          steering = 0.4f; // Turn left
-          pedal = -0.6f; // Go backward
+          steering = maxAngle / 3.0f * 2.0f; // Turn left
+          pedal = -maxPedalPosition / 8.0f * 6.0f; // Go backward
         }
         else if( right < minRightDist ){
-          steering = -0.4f; // Turn right
-          pedal = -0.6f; // Go backward
+          steering = -maxAngle / 3.0f * 2.0f; // Turn right
+          pedal = -maxPedalPosition / 8.0f * 6.0f; // Go backward
         }
         else{
           if ( nFrontGoBackCount > 0 ){
-            steering = 0.4f; // Turn left
-            pedal = -0.6f; // Go backward
+            steering = maxAngle / 3.0f * 2.0f; // Turn left
+            pedal = -maxPedalPosition / 8.0f * 6.0f; // Go backward
             nFrontGoBackCount++;
           }
           else if ( nFrontGoBackCount < 0 ){
-            steering = -0.4f; // Turn right
-            pedal = -0.6f; // Go backward
+            steering = -maxAngle / 3.0f * 2.0f; // Turn right
+            pedal = -maxPedalPosition / 8.0f * 6.0f; // Go backward
             nFrontGoBackCount--;
           }
 
@@ -167,17 +167,17 @@ int32_t main(int32_t argc, char **argv)
       if ( rear < minRearDist ){
         if( left < minLeftDist || right < minRightDist ){
           steering = 0.0f; // No turn
-          pedal = 0.7f; // Go front
+          pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
         }
         else{
           if ( nBackGoFrontCount > 0 ){
-            steering = 0.4f; // Turn left
-            pedal = 0.7f; // Go front
+            steering = maxAngle / 3.0f * 2.0f; // Turn left
+            pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
             nBackGoFrontCount++;
           }
           else if ( nBackGoFrontCount < 0 ){
-            steering = -0.4f; // Turn right
-            pedal = 0.7f; // Go front
+            steering = -maxAngle / 3.0f * 2.0f; // Turn right
+            pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
             nBackGoFrontCount--;
           }
 
@@ -204,10 +204,10 @@ int32_t main(int32_t argc, char **argv)
         steering = 0.0f;
       }    
       else if ( left < minLeftDist ){ // Too close to left: turn right(not yet known, set to 0.2)
-        steering = -0.2f;
+        steering = - maxAngle / 3.0f * 2.0f;
       }        
       else if ( right < minRightDist ){ // Too close to right: turn left
-        steering = 0.2f;
+        steering =  maxAngle / 3.0f * 2.0f;
       }
 
       // Write to other microservice
@@ -219,12 +219,12 @@ int32_t main(int32_t argc, char **argv)
     }
 
     // If avoid count is larger than 1, than continue to do the action
-    if ( nAvoidCollisionCount > 0 && nAvoidCollisionCount < 10 ){
+    if ( nAvoidCollisionCount > 0 && nAvoidCollisionCount < avoidCount ){
       // Do nothing with steer / pedal
       nAvoidCollisionCount++;
       continue;
     }  
-    else if( nAvoidCollisionCount >= 10 ){
+    else if( nAvoidCollisionCount >= avoidCount ){
       nAvoidCollisionCount = 0; // Stop the avoid collision action after 10 count
     }
     
@@ -232,7 +232,7 @@ int32_t main(int32_t argc, char **argv)
     if ( dist_kiwi < 0 ){ // Start to find around for kiwi car
       // std::cout << "Start to find blue papper" << std::endl;
       steering = 0.0f; // No turn
-      pedal = 0.6f; // Go front
+      pedal = maxPedalPosition * 0.6f; // Go front
     }
     else if ( dist_kiwi < minDist ){
       // Reach the blue papper, stop the car

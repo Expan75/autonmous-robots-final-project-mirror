@@ -33,6 +33,9 @@ int32_t main(int32_t argc, char **argv)
   float minBPDist = (cmd.count("minBP") != 0) ? std::stof(cmd["minBP"]) : 140.0f;
   float minGPDist = (cmd.count("minGP") != 0) ? std::stof(cmd["minGP"]) : 150.0f;
   bool isCollisionAvoidanceMode = (cmd.count("Col") != 0) ? std::stoi(cmd["Col"]) : true;
+  int avoidCount = (cmd.count("avoidCount") != 0) ? std::stoi(cmd["avoidCount"]) : 10;
+  int bPCount = (cmd.count("bPCount") != 0) ? std::stoi(cmd["bPCount"]) : 3000;
+  int wigDelayCount = (cmd.count("wigDelayCount") != 0) ? std::stoi(cmd["wigDelayCount"]) : 10;
 
   cluon::OD4Session od4(cid);
 
@@ -68,10 +71,6 @@ int32_t main(int32_t argc, char **argv)
       right = dr.distance();
       break;
     }
-    // std::cout << "Distance front: " << front 
-    //           << ", Distance rear: " << rear
-    //           << ", Distance left: " << left
-    //           << ", Distance right: " << right << std::endl;
     isDistEventTriggered = true;
   };
   // Finally, we register our lambda for the message identifier for
@@ -102,10 +101,6 @@ int32_t main(int32_t argc, char **argv)
       aimDirection_b_papper = std::stof(strPosition.substr(comma_index+1,strPosition.length()-1));
     }
     isDetectionEventTriggered = true;
-    // std::cout << "Distance to blue papper: " << dist_b_papper 
-    //           << "Angle to blue papper: " << aimDirection_b_papper << std::endl;
-    // std::cout << "Distance to green papper: " << dist_g_papper 
-    //           << "Angle to green papper: " << aimDirection_g_papper << std::endl;
   }};
   od4.dataTrigger(opendlv::logic::perception::DetectionProperty::ID(),
     onDetectionPropertyReading);
@@ -114,7 +109,7 @@ int32_t main(int32_t argc, char **argv)
   int nFrontGoBackCount = 1;
   int nBackGoFrontCount = 1;
   int nAvoidCollisionCount = 0;
-  int nStartToFindBluePapperCount = 3*1e3;
+  int nStartToFindBluePapperCount = bPCount;
   int nWiggleCount = 0;
   while (od4.isRunning())
   {
@@ -138,11 +133,11 @@ int32_t main(int32_t argc, char **argv)
     nStartToFindBluePapperCount++;
 
     // Add count to wiggle count to drive away from current green papper
-    if ( nWiggleCount >= 10 && nWiggleCount < 20 ){
+    if ( nWiggleCount >= 10 && nWiggleCount < 10 + wigDelayCount ){
       // std::cout << "Wiggle Count over 10" << std::endl;
       nWiggleCount++;
     }
-    else if ( nWiggleCount >= 20 ){
+    else if ( nWiggleCount >= 10 + wigDelayCount ){
       // std::cout << "Wiggle Count over 20, reset!" << std::endl;
       nWiggleCount = 0;
     }
@@ -237,10 +232,10 @@ int32_t main(int32_t argc, char **argv)
         steering = 0.0f;
       }    
       else if ( left < minLeftDist ){ // Too close to left: turn right(not yet known, set to 0.2)
-        steering = -maxAngle / 3.0f * 1.0f;
+        steering = -maxAngle / 3.0f * 2.0f;
       }        
       else if ( right < minRightDist ){ // Too close to right: turn left
-        steering = maxAngle / 3.0f * 1.0f;
+        steering = maxAngle / 3.0f * 2.0f;
       }
 
       // Write to other microservice
@@ -252,18 +247,18 @@ int32_t main(int32_t argc, char **argv)
     }
 
     // If avoid count is larger than 1, than continue to do the action
-    if ( nAvoidCollisionCount > 0 && nAvoidCollisionCount < 10 ){
+    if ( nAvoidCollisionCount > 0 && nAvoidCollisionCount < avoidCount ){
       // std::cout << "Avoidance is counting!!" << std::endl;
       // Do nothing with steer / pedal
       nAvoidCollisionCount++;
       continue;
     }  
-    else if( nAvoidCollisionCount >= 10 ){
+    else if( nAvoidCollisionCount >= avoidCount ){
       nAvoidCollisionCount = 0; // Stop the avoid collision action after 10 count
     }
     
     // Blue Papper
-    if ( nStartToFindBluePapperCount > 3*1e3 ){
+    if ( nStartToFindBluePapperCount > bPCount ){
       if ( dist_b_papper < 0 ){ // Start to find around for blue papper
         std::cout << "Start to find blue papper" << std::endl;
         steering = 0.0f; // No turn
@@ -330,7 +325,7 @@ int32_t main(int32_t argc, char **argv)
     }
     else { // If green papper exist, 
       // Setup steering
-        std::cout << "green papper exist! try to find it. The dist is: " << dist_g_papper << std::endl;
+      std::cout << "green papper exist! try to find it. The dist is: " << dist_g_papper << std::endl;
       steering = aimDirection_g_papper / 90 * maxSteering;
       if ( steering >= maxAngle ){
         steering = maxAngle ;

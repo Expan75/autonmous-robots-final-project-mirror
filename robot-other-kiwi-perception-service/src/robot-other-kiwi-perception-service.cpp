@@ -35,6 +35,11 @@ int32_t main(int32_t argc, char **argv)
     uint32_t const width{static_cast<uint32_t>(std::stoi(cmd["width"]))};
     uint32_t const height{static_cast<uint32_t>(std::stoi(cmd["height"]))};
     bool const verbose{cmd.count("verbose") != 0};
+    double cirDist = (cmd.count("cirDist") != 0) ? std::stod(cmd["cirDist"]) : height / 64;
+    double houghParam1 = (cmd.count("houghParam1") != 0) ? std::stod(cmd["houghParam1"]) : 100;
+    double houghParam2 = (cmd.count("houghParam2") != 0) ? std::stod(cmd["houghParam2"]) : 18.65;
+    int minCirRad = (cmd.count("minCirRad") != 0) ? std::stoi(cmd["minCirRad"]) : 0;
+    int maxCirRad = (cmd.count("maxCirRad") != 0) ? std::stoi(cmd["maxCirRad"]) : 18;
 
     // Attach to the shared memory.
     std::unique_ptr<cluon::SharedMemory> sharedMemory{
@@ -104,10 +109,6 @@ int32_t main(int32_t argc, char **argv)
           right = dr.distance();
           break;
         }
-        // std::cout << "Distance front: " << front 
-        //           << ", Distance rear: " << rear
-        //           << ", Distance left: " << left
-        //           << ", Distance right: " << right << std::endl;
         isDistEventTriggered = true;
       };
       // Finally, we register our lambda for the message identifier for
@@ -150,9 +151,9 @@ int32_t main(int32_t argc, char **argv)
         
         std::vector<cv::Vec3f> circles;
         HoughCircles(grayImage, circles, cv::HOUGH_GRADIENT, 1,
-        grayImage.rows/64, // change this value to detect circles with different distances to each other
-        100, 30, 
-        0, 30 // change the last two parameters
+        cirDist, // change this value to detect circles with different distances to each other
+        houghParam1, houghParam2, 
+        minCirRad, maxCirRad // change the last two parameters
         // (min_radius & max_radius) to detect larger circles
         );
 
@@ -165,7 +166,7 @@ int32_t main(int32_t argc, char **argv)
 
           // circle center
           cv::Point2f center = cv::Point2f(c[0], c[1]);
-          if ( img.rows - c[1] <= img.rows / 6 || c[1] <= img.rows / 2 ){
+          if ( img.rows - c[1] <= 105 || c[1] <= img.rows / 2 ){
             continue;
           }
           circle( img, center, 1, cv::Scalar(0,100,100), 3, cv::LINE_AA);
@@ -173,7 +174,8 @@ int32_t main(int32_t argc, char **argv)
           nCounter++;
 
           // circle outline
-          int radius = static_cast<int>(c[2]);
+          int radius = static_cast<int>(c[2]);          
+          // cv::putText(img, std::to_string(center.x) + std::to_string(center.y),center,cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,255,255));
           circle( img, center, radius, cv::Scalar(255,0,255), 3, cv::LINE_AA);
         }
         AimPt = (nCounter == 0) ? cv::Point2f(img.cols / 2, img.rows) : cv::Point2f(AimPt.x / nCounter, AimPt.y / nCounter);
