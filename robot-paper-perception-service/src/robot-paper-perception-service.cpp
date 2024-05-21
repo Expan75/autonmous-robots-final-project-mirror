@@ -300,7 +300,7 @@ int32_t main(int32_t argc, char **argv)
         message.sampleId(0); //0 stands for the papper
         message.detectionId(0); //0 stands for green, 1 for blue
         message.property(std::to_string(dist) + ";" + std::to_string(aimDirection)); //property stands for dist / angle
-        od4.send(message);
+        if(dist >= 0){od4.send(message);}
         dist = (bsizeCount != 0) ? 
         std::sqrt(std::pow(img.cols / 2 - centerPt_blue.x,2.0f) + std::pow(img.rows - centerPt_blue.y,2.0f))
         : -1.0f;
@@ -308,7 +308,7 @@ int32_t main(int32_t argc, char **argv)
         message.sampleId(0); //0 stands for the papper
         message.detectionId(1); //0 stands for green, 1 for blue
         message.property(std::to_string(dist) + ";" + std::to_string(aimDirection)); //property stands for dist / angle
-        od4.send(message);
+        if(dist >= 0){od4.send(message);}
       }
     }
     retCode = 0;
