@@ -133,7 +133,7 @@ int32_t main(int32_t argc, char **argv)
       // Endless loop; end the program by pressing Ctrl-C.
       while (od4.isRunning()) {
         cv::Mat img;
-        cv::Mat testMat; // For DODO test
+        // cv::Mat testMat; // For DODO test
 
         // Wait for a notification of a new frame.
         sharedMemory->wait();
@@ -141,13 +141,13 @@ int32_t main(int32_t argc, char **argv)
         // Lock the shared memory.
         sharedMemory->lock();
         {
-          // cv::Mat wrapped(height, width, CV_8UC3, sharedMemory->data());
-          cv::Mat wrapped_1(height, width, CV_8UC4, sharedMemory->data());
-          // img = wrapped.clone();
-          testMat = wrapped_1.clone();
+          cv::Mat wrapped(height, width, CV_8UC3, sharedMemory->data());
+          // cv::Mat wrapped_1(height, width, CV_8UC4, sharedMemory->data());
+          img = wrapped.clone();
+          // testMat = wrapped_1.clone();
         }
         sharedMemory->unlock();
-        cv::cvtColor(testMat, img, cv::COLOR_BGRA2BGR);
+        // cv::cvtColor(testMat, img, cv::COLOR_BGRA2BGR);
         // cv::imshow("Test Image: ", testMat);
 
         // Turn the color to HSV
@@ -156,8 +156,8 @@ int32_t main(int32_t argc, char **argv)
         cv::Mat hsv;
         cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
 
-        // cv::Rect roi(0, hsv.rows / 2 , hsv.cols, hsv.rows / 2 );
-        cv::Rect roi(0, hsv.rows * 7 / 12 , hsv.cols, hsv.rows * 5 / 12 ); // For DODO Test
+        cv::Rect roi(0, hsv.rows / 2 , hsv.cols, hsv.rows / 2 );
+        // cv::Rect roi(0, hsv.rows * 7 / 12 , hsv.cols, hsv.rows * 5 / 12 ); // For DODO Test
         // cv::Rect roi_center(hsv.cols / 4, hsv.rows * 5 / 9, hsv.cols / 2, hsv.rows /9);
         // hsv = hsv(roi);
 
@@ -166,8 +166,8 @@ int32_t main(int32_t argc, char **argv)
         cv::Mat bC_sharpen;
         cv::inRange(hsv(roi), cv::Scalar(hYellowLow,sYellowLow,vYellowLow), cv::Scalar(hYellowHigh,sYellowHigh,vYellowHigh), yC_sharpen);    // For yellow cones
         cv::inRange(hsv(roi), cv::Scalar(hBlueLow,sBlueLow,vBlueLow), cv::Scalar(hBlueHigh,sBlueHigh,vBlueHigh), bC_sharpen);  // For blue cones
-        cv::inRange(hsv(roi), cv::Scalar(25,245,245), cv::Scalar(35,255,255), yC_sharpen);    // For yellow cones of DODO test SIL
-        cv::inRange(hsv(roi), cv::Scalar(115,245,245), cv::Scalar(125,255,255), bC_sharpen);  // For blue cones of DODO test SIL
+        // cv::inRange(hsv(roi), cv::Scalar(25,245,245), cv::Scalar(35,255,255), yC_sharpen);    // For yellow cones of DODO test SIL
+        // cv::inRange(hsv(roi), cv::Scalar(115,245,245), cv::Scalar(125,255,255), bC_sharpen);  // For blue cones of DODO test SIL
         cv::Mat element = getStructuringElement( cv::MORPH_RECT , cv::Size( 3,3 ), cv::Point( 0,0 ) );
         cv::morphologyEx( yC_sharpen, yC_sharpen, cv::MORPH_CLOSE , element );
         cv::morphologyEx( yC_sharpen, yC_sharpen, cv::MORPH_OPEN , element );
