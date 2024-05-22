@@ -23,6 +23,7 @@ int32_t main(int32_t argc, char **argv)
     return 0;
   }  
   float maxPedalPosition = (cmd.count("maxPed") != 0) ? std::stof(cmd["maxPed"]) : 1.0f;
+  float maxPedalBWPosition = (cmd.count("maxPedBW") != 0) ? std::stof(cmd["maxPedBW"]) : 1.5f;
   float minPedalPosition = (cmd.count("minPed") != 0) ? std::stof(cmd["minPed"]) : 0.6f;
   int maxSteering = (cmd.count("maxSter") != 0) ? std::stoi(cmd["maxSter"]) : 35;
   float maxAngle = maxSteering / static_cast<float>(180)* static_cast<float>(2*acos(0.0));
@@ -34,6 +35,8 @@ int32_t main(int32_t argc, char **argv)
   float minDist = (cmd.count("minDist") != 0) ? std::stof(cmd["minDist"]) : 150.0f;
   int avoidCount = (cmd.count("avoidCount") != 0) ? std::stoi(cmd["avoidCount"]) : 10;
   bool isCollisionAvoidanceMode = (cmd.count("Col") != 0) ? std::stoi(cmd["Col"]) : true;
+  int BFCount = (cmd.count("BFCount") != 0) ? std::stoi(cmd["BFCount"]) : 30;
+  int FBCount = (cmd.count("FBCount") != 0) ? std::stoi(cmd["FBCount"]) : 30;
 
   cluon::OD4Session od4(cid);
 
@@ -127,29 +130,29 @@ int32_t main(int32_t argc, char **argv)
       if ( front < minFrontDist ){
         if( left < minLeftDist ){
           steering = maxAngle / 3.0f * 2.0f; // Turn left
-          pedal = -maxPedalPosition / 8.0f * 6.0f; // Go backward
+          pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
         }
         else if( right < minRightDist ){
           steering = -maxAngle / 3.0f * 2.0f; // Turn right
-          pedal = -maxPedalPosition / 8.0f * 6.0f; // Go backward
+          pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
         }
         else{
           if ( nFrontGoBackCount > 0 ){
             steering = maxAngle / 3.0f * 2.0f; // Turn left
-            pedal = -maxPedalPosition / 8.0f * 6.0f; // Go backward
+            pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
             nFrontGoBackCount++;
           }
           else if ( nFrontGoBackCount < 0 ){
             steering = -maxAngle / 3.0f * 2.0f; // Turn right
-            pedal = -maxPedalPosition / 8.0f * 6.0f; // Go backward
+            pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
             nFrontGoBackCount--;
           }
 
-          if ( nFrontGoBackCount > 3 ){
+          if ( nFrontGoBackCount > FBCount ){
             nFrontGoBackCount = 0;
             nFrontGoBackCount--;
           }
-          else if ( nFrontGoBackCount < -3 ){
+          else if ( nFrontGoBackCount < -FBCount ){
             nFrontGoBackCount = 0;
             nFrontGoBackCount++;
           }
@@ -181,11 +184,11 @@ int32_t main(int32_t argc, char **argv)
             nBackGoFrontCount--;
           }
 
-          if ( nBackGoFrontCount > 3 ){
+          if ( nBackGoFrontCount > BFCount ){
             nBackGoFrontCount = 0;
             nBackGoFrontCount--;
           }
-          else if ( nBackGoFrontCount < -3 ){
+          else if ( nBackGoFrontCount < -BFCount ){
             nBackGoFrontCount = 0;
             nBackGoFrontCount++;
           }
