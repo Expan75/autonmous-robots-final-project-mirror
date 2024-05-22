@@ -23,8 +23,9 @@ int32_t main(int32_t argc, char **argv)
     return 0;
   }  
   float maxPedalPosition = (cmd.count("maxPed") != 0) ? std::stof(cmd["maxPed"]) : 1.0f;
+  float minPedalPosition = (cmd.count("minPed") != 0) ? std::stof(cmd["minPed"]) : 0.5f;
   float maxPedalBWPosition = (cmd.count("maxPedBW") != 0) ? std::stof(cmd["maxPedBW"]) : 1.5f;
-  float minPedalPosition = (cmd.count("minPed") != 0) ? std::stof(cmd["minPed"]) : 0.6f;
+  float minPedalBWPosition = (cmd.count("minPedBW") != 0) ? std::stof(cmd["minPedBW"]) : 1.0f;
   int maxSteering = (cmd.count("maxSter") != 0) ? std::stoi(cmd["maxSter"]) : 35;
   float maxAngle = maxSteering / static_cast<float>(180)* static_cast<float>(2*acos(0.0));
   float minFrontDist = (cmd.count("minFront") != 0) ? std::stof(cmd["minFront"]) : 0.2f;
@@ -129,21 +130,21 @@ int32_t main(int32_t argc, char **argv)
       // Too close to front
       if ( front < minFrontDist ){
         if( left < minLeftDist ){
-          steering = maxAngle / 3.0f * 2.0f; // Turn left
+          steering = maxAngle; // Turn left
           pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
         }
         else if( right < minRightDist ){
-          steering = -maxAngle / 3.0f * 2.0f; // Turn right
+          steering = -maxAngle; // Turn right
           pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
         }
         else{
           if ( nFrontGoBackCount > 0 ){
-            steering = maxAngle / 3.0f * 2.0f; // Turn left
+            steering = maxAngle; // Turn left
             pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
             nFrontGoBackCount++;
           }
           else if ( nFrontGoBackCount < 0 ){
-            steering = -maxAngle / 3.0f * 2.0f; // Turn right
+            steering = -maxAngle; // Turn right
             pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
             nFrontGoBackCount--;
           }
@@ -174,12 +175,12 @@ int32_t main(int32_t argc, char **argv)
         }
         else{
           if ( nBackGoFrontCount > 0 ){
-            steering = maxAngle / 3.0f * 2.0f; // Turn left
+            steering = maxAngle; // Turn left
             pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
             nBackGoFrontCount++;
           }
           else if ( nBackGoFrontCount < 0 ){
-            steering = -maxAngle / 3.0f * 2.0f; // Turn right
+            steering = -maxAngle; // Turn right
             pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
             nBackGoFrontCount--;
           }
@@ -207,10 +208,10 @@ int32_t main(int32_t argc, char **argv)
         steering = 0.0f;
       }    
       else if ( left < minLeftDist ){ // Too close to left: turn right(not yet known, set to 0.2)
-        steering = - maxAngle / 3.0f * 2.0f;
+        steering = - maxAngle;
       }        
       else if ( right < minRightDist ){ // Too close to right: turn left
-        steering =  maxAngle / 3.0f * 2.0f;
+        steering =  maxAngle;
       }
 
       // Write to other microservice
@@ -239,8 +240,19 @@ int32_t main(int32_t argc, char **argv)
     }
     else if ( dist_kiwi < minDist ){
       // Reach the blue papper, stop the car
-      steering = 0.0f; // No turn
-      pedal = 0.0f; // No pedal
+      steering = aimDirection_kiwi / 90 * maxSteering;
+      if ( steering >= maxAngle ){
+        steering = maxAngle ;
+      }
+      else if ( steering <= -maxAngle ){
+        steering = -maxAngle;
+      }
+      
+      pedal = (minDist - dist_kiwi) / (maxDist - minDist) * (maxPedalBWPosition - minPedalBWPosition) + minPedalBWPosition; // Go front
+      pedal = - pedal;
+      if ( std::fabs(pedal) >= maxPedalBWPosition ){
+        pedal = - maxPedalBWPosition;
+      }
       std::cout << "Find kiwi car! the distance is :" << dist_kiwi << std::endl;
     }
     else{ // If blue papper exist, 

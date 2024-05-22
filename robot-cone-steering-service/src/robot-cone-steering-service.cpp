@@ -28,12 +28,12 @@ int32_t main(int32_t argc, char **argv)
   float maxAngle = maxSteering / static_cast<float>(180)* static_cast<float>(2*acos(0.0));
   float angDevRagSmall = (cmd.count("angDevRagSmall") != 0) ? std::stof(cmd["angDevRagSmall"]) : 0.2f;
   float angDevRagMid = (cmd.count("angDevRagMid") != 0) ? std::stof(cmd["angDevRagMid"]) : 0.5f;
-  float angMidRange = (cmd.count("angMidRange") != 0) ? std::stof(cmd["angMidRange"]) : 0.15f;
-  float midRangeAcc = (cmd.count("midRangeAcc") != 0) ? std::stof(cmd["midRangeAcc"]) : 0.05f;
-  float otherRangeAcc = (cmd.count("otherRangeAcc") != 0) ? std::stof(cmd["otherRangeAcc"]) : 0.01f;
-  float midRangeDcc = (cmd.count("midRangeDcc") != 0) ? std::stof(cmd["midRangeDcc"]) : 0.03f;
-  float otherRangeDcc = (cmd.count("otherRangeDcc") != 0) ? std::stof(cmd["otherRangeDcc"]) : 0.05f;
-  float maxMinRatio = (cmd.count("maxMinRatio") != 0) ? std::stof(cmd["maxMinRatio"]) : 0.6f;
+  float angMidRange = (cmd.count("angMidRange") != 0) ? std::stof(cmd["angMidRange"]) : 0.25f;
+  float midRangeAcc = (cmd.count("midRangeAcc") != 0) ? std::stof(cmd["midRangeAcc"]) : 0.10f;
+  float otherRangeAcc = (cmd.count("otherRangeAcc") != 0) ? std::stof(cmd["otherRangeAcc"]) : 0.08f;
+  float midRangeDcc = (cmd.count("midRangeDcc") != 0) ? std::stof(cmd["midRangeDcc"]) : 0.08f;
+  float otherRangeDcc = (cmd.count("otherRangeDcc") != 0) ? std::stof(cmd["otherRangeDcc"]) : 0.10f;
+  float maxMinRatio = (cmd.count("maxMinRatio") != 0) ? std::stof(cmd["maxMinRatio"]) : 0.8f;
 
   cluon::OD4Session od4(cid);
 

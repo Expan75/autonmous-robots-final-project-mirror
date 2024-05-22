@@ -36,9 +36,13 @@ int32_t main(int32_t argc, char **argv)
   bool isCollisionAvoidanceMode = (cmd.count("Col") != 0) ? std::stoi(cmd["Col"]) : true;
   int avoidCount = (cmd.count("avoidCount") != 0) ? std::stoi(cmd["avoidCount"]) : 10;
   int bPCount = (cmd.count("bPCount") != 0) ? std::stoi(cmd["bPCount"]) : 3000;
-  int wigDelayCount = (cmd.count("wigDelayCount") != 0) ? std::stoi(cmd["wigDelayCount"]) : 10;
+  int wigDelayCount = (cmd.count("wigDelayCount") != 0) ? std::stoi(cmd["wigDelayCount"]) : 50;
+  int wigCount = (cmd.count("wigCount") != 0) ? std::stoi(cmd["wigCount"]) : 20;
   int BFCount = (cmd.count("BFCount") != 0) ? std::stoi(cmd["BFCount"]) : 30;
   int FBCount = (cmd.count("FBCount") != 0) ? std::stoi(cmd["FBCount"]) : 30;
+  int DelayTime = (cmd.count("DelayTime") != 0) ? std::stoi(cmd["DelayTime"]) : 3000;
+  bool isDoParking = (cmd.count("Parking") != 0) ? std::stoi(cmd["Parking"]) : false;
+  int nParkingCount = (cmd.count("ParkingCount") != 0) ? std::stoi(cmd["ParkingCount"]) : 20;
 
   cluon::OD4Session od4(cid);
 
@@ -136,11 +140,11 @@ int32_t main(int32_t argc, char **argv)
     nStartToFindBluePapperCount++;
 
     // Add count to wiggle count to drive away from current green papper
-    if ( nWiggleCount >= 10 && nWiggleCount < 10 + wigDelayCount ){
+    if ( nWiggleCount >= wigCount && nWiggleCount < wigCount + wigDelayCount ){
       // std::cout << "Wiggle Count over 10" << std::endl;
       nWiggleCount++;
     }
-    else if ( nWiggleCount >= 10 + wigDelayCount ){
+    else if ( nWiggleCount >= wigCount + wigDelayCount ){
       // std::cout << "Wiggle Count over 20, reset!" << std::endl;
       nWiggleCount = 0;
     }
@@ -155,23 +159,23 @@ int32_t main(int32_t argc, char **argv)
       if ( front < minFrontDist ){
         if( left < minLeftDist ){
         // std::cout << "Too close to Front/Left" << std::endl;
-          steering = maxAngle / 3.0f * 2.0f; // Turn left
+          steering = maxAngle; // Turn left
           pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
         }
         else if( right < minRightDist ){
           // std::cout << "Too close to Front/Right" << std::endl;
-          steering = -maxAngle / 3.0f * 2.0f; // Turn right
+          steering = -maxAngle; // Turn right
           pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
         }
         else{
           // std::cout << "Too close to Front only" << std::endl;
           if ( nFrontGoBackCount > 0 ){
-            steering = maxAngle / 3.0f * 2.0f; // Turn left
+            steering = maxAngle; // Turn left
             pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
             nFrontGoBackCount++;
           }
           else if ( nFrontGoBackCount < 0 ){
-            steering = -maxAngle / 3.0f * 2.0f; // Turn right
+            steering = -maxAngle; // Turn right
             pedal = -maxPedalBWPosition / 8.0f * 6.0f; // Go backward
             nFrontGoBackCount--;
           }
@@ -202,12 +206,12 @@ int32_t main(int32_t argc, char **argv)
         }
         else{
           if ( nBackGoFrontCount > 0 ){
-            steering = maxAngle / 3.0f * 2.0f; // Turn left
+            steering = maxAngle; // Turn left
             pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
             nBackGoFrontCount++;
           }
           else if ( nBackGoFrontCount < 0 ){
-            steering = -maxAngle / 3.0f * 2.0f; // Turn right
+            steering = -maxAngle; // Turn right
             pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
             nBackGoFrontCount--;
           }
@@ -235,10 +239,10 @@ int32_t main(int32_t argc, char **argv)
         steering = 0.0f;
       }    
       else if ( left < minLeftDist ){ // Too close to left: turn right(not yet known, set to 0.2)
-        steering = -maxAngle / 3.0f * 2.0f;
+        steering = -maxAngle;
       }        
       else if ( right < minRightDist ){ // Too close to right: turn left
-        steering = maxAngle / 3.0f * 2.0f;
+        steering = maxAngle;
       }
 
       // Write to other microservice
@@ -273,6 +277,7 @@ int32_t main(int32_t argc, char **argv)
         pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
         nStartToFindBluePapperCount = 0;
         std::cout << "Find blue papper! the distance is :" << dist_b_papper << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(DelayTime));
       }
       else{ // If blue papper exist, 
         // Setup steering
@@ -298,16 +303,15 @@ int32_t main(int32_t argc, char **argv)
     }
 
     // Try to find Green Papper
-    if ( dist_g_papper < 0 || nWiggleCount >= 10 ){ // Start to find around for another green papper
+    if ( dist_g_papper < 0 || (isDoParking == false && nWiggleCount >= wigCount) ){ // Start to find around for another green papper
       std::cout << "Start to find green paper" << std::endl;
       steering = 0.0f; // No turn
       pedal = maxPedalPosition / 8.0f * 6.0f; // Go front
     }
-    else if ( dist_g_papper < minGPDist && nWiggleCount < 10 ){
+    else if ( dist_g_papper < minGPDist || nWiggleCount < wigCount ){
       // Reach the blue papper, stop the car and do wiggles
       pedal = 0.0f; // stop
-      steering = 0.0f;
-      std::cout << "Find green papper, start to wiggle!" << std::endl;
+      std::cout << "Find green paper, start to wiggle!" << std::endl;
 
       // Do wiggle
       // std::this_thread::sleep_for(std::chrono::milliseconds(800)); // use delay to not let wiggle command sent to fast
@@ -325,6 +329,16 @@ int32_t main(int32_t argc, char **argv)
         steering = 0.3f ;
       }
       nWiggleCount++;
+    }
+    else if ( isDoParking && nWiggleCount >= wigCount ){
+      if ( nWiggleCount - wigCount <= nParkingCount ){        
+        steering  = maxAngle;    
+        pedal = maxPedalPosition / 8.0f * 7.0f;
+      }
+      else{ 
+        steering  = - maxAngle;    
+        pedal = - maxPedalBWPosition / 8.0f * 7.0f;
+      }
     }
     else { // If green papper exist, 
       // Setup steering
