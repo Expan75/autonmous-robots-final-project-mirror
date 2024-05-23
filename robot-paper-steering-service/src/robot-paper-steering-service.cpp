@@ -274,7 +274,7 @@ int32_t main(int32_t argc, char **argv)
       else if ( dist_b_papper < minBPDist ){
         // Reach the blue papper, stop the car
         steering = 0.0f; // No turn
-        pedal = maxPedalPosition / 8.0f * 7.0f; // Go front
+        pedal = 0.0f; // Go front
         nStartToFindBluePapperCount = 0;
         std::cout << "Find blue papper! the distance is :" << dist_b_papper << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(DelayTime));
@@ -314,7 +314,7 @@ int32_t main(int32_t argc, char **argv)
       std::cout << "Find green paper, start to wiggle!" << std::endl;
 
       // Do wiggle
-      // std::this_thread::sleep_for(std::chrono::milliseconds(800)); // use delay to not let wiggle command sent to fast
+      std::this_thread::sleep_for(std::chrono::milliseconds(800)); // use delay to not let wiggle command sent to fast
       if ( steering >= 0.0f ){
         steering += 0.3f;    
       }
