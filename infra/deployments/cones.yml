@@ -1,0 +1,141 @@
+# Docker compose for all robot services
+version: "3.8"
+
+x-base: &service-base
+  restart: unless-stopped
+  labels:
+    org.label-schema.group: "team11-robot"
+
+x-defaults: &service-defaults
+  <<: *service-base
+  network_mode: service:tailscale
+  depends_on:
+    - tailscale
+
+services:
+  perception:
+    <<: *service-base
+    image: registry.git.chalmers.se/courses/tme290/2024/group11/team11-project-monorepo:robot-cone-perception-service-v1.0.4
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+      - CID={CID}
+      - PERCEPTION_NAME=${PERCEPTION_NAME}
+      - PERCEPTION_WIDTH=${PERCEPTION_WIDTH}
+      - PERCEPTION_HEIGHT=${PERCEPTION_HEIGHT}
+      - PERCEPTION_YB_RATIO=${PERCEPTION_YB_RATIO}
+      - PERCEPTION_H_BLUE_LOW=${PERCEPTION_H_BLUE_LOW}
+      - PERCEPTION_S_BLUE_LOW=${PERCEPTION_S_BLUE_LOW}
+      - PERCEPTION_V_BLUE_LOW=${PERCEPTION_V_BLUE_LOW}
+      - PERCEPTION_H_BLUE_HIGH=${PERCEPTION_H_BLUE_HIGH}
+      - PERCEPTION_S_BLUE_HIGH=${PERCEPTION_S_BLUE_HIGH}
+      - PERCEPTION_V_BLUE_HIGH=${PERCEPTION_V_BLUE_HIGH}
+      - PERCEPTION_H_YELLOW_LOW=${PERCEPTION_H_YELLOW_LOW}
+      - PERCEPTION_S_YELLOW_LOW=${PERCEPTION_S_YELLOW_LOW}
+      - PERCEPTION_V_YELLOW_LOW=${PERCEPTION_V_YELLOW_LOW}
+      - PERCEPTION_H_YELLOW_HIGH=${PERCEPTION_H_YELLOW_HIGH}
+      - PERCEPTION_S_YELLOW_HIGH=${PERCEPTION_S_YELLOW_HIGH}
+      - PERCEPTION_V_YELLOW_HIGH=${PERCEPTION_V_YELLOW_HIGH}
+    command: >
+      "--cid=$CID
+      --name=$PERCEPTION_NAME
+      --width$PERCEPTION_WIDTH 
+      --height=$PERCEPTION_HEIGHT
+      --YBRatio=$PERCEPTION_YB_RATIO
+      --hBlueLow=$PERCEPTION_H_BLUE_LOW
+      --sBlueLow=$PERCEPTION_S_BLUE_LOW
+      --vBlueLow=$PERCEPTION_V_BLUE_LOW 
+      --hBlueHigh=$PERCEPTION_H_BLUE_HIGH
+      --sBlueHigh=$PERCEPTION_S_BLUE_HIGH
+      --vBlueHigh=$PERCEPTION_V_BLUE_HIGH
+      --hYellowLow=$PERCEPTION_H_YELLOW_LOW 
+      --sYellowLow=$PERCEPTION_S_YELLOW_LOW 
+      --vYellowLow=$PERCEPTION_V_YELLOW_LOW 
+      --hYellowHigh=$PERCEPTION_H_YELLOW_HIGH 
+      --sYellowHigh=$PERCEPTION_S_YELLOW_HIGH 
+      --vYellowHigh=$PERCEPTION_V_YELLOW_HIGH 
+      --verbose"
+
+  steering:
+    image: registry.git.chalmers.se/courses/tme290/2024/group11/team11-project-monorepo:robot-cone-steering-service-v1.0.6
+    environment:
+      - DISPLAY=${DISPLAY}
+      - CID=${CID}
+      - MAX_PED=${MAX_PED}
+      - MAX_STER=${MAX_STER}
+      - ANG_DEV_RAG_SMALL=${ANG_DEV_RAG_SMALL}
+      - ANG_DEV_RAG_MID=${ANG_DEV_RAG_MID}
+      - ANG_MID_RANGE=${ANG_MID_RANGE}
+      - MID_RANGE_ACC=${MID_RANGE_ACC}
+      - OTHER_RANGE_ACC=${OTHER_RANGE_ACC}
+      - MID_RANGE_DCC=${MID_RANGE_DCC}
+      - OTHER_RANGE_DCC=${OTHER_RANGE_DCC}
+      - MAX_MIN_RATIO=${MAX_MIN_RATIO}
+
+    command: >
+      "--cid=$CID
+      --maxPed=$MAX_PED
+      --maxSter=$MAX_PED 
+      --angDevRagSmall=$ANG_MID_RANGE 
+      --angDevRagMid=$ANG_DEV_RAG_MID 
+      --angMidRange=$ANG_MID_RANGE 
+      --midRangeAcc=$MID_RANGE_ACC 
+      --otherRangeAcc=$OTHER_RANGE_ACC 
+      --midRangeDcc=$MID_RANGE_DCC 
+      --otherRangeDcc=$OTHER_RANGE_DCC 
+      --maxMinRatio=$MAX_MIN_RATIO
+      "
+
+  # VPN client that doesn't mess with native host network settings
+  tailscale:
+    <<: *service-base
+    image: tailscale/tailscale:latest
+    cap_add:
+      - net_admin
+      - sys_module
+    volumes:
+      - ./tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_HOSTNAME=team11-robot
+      - TS_AUTHKEY=tskey-auth-kXdsQDr95921CNTRL-gpV35r9oSrLapPWivreskLzePvgUUcof
+
+  watchtower:
+    <<: *service-defaults
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 15 --http-api-metrics --http-api-token demotoken
+  # host level monitoring
+
+  nodeexporter:
+    <<: *service-defaults
+    image: prom/node-exporter:latest
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+  # host level monitoring
+  cadvisor:
+    <<: *service-defaults
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: robot-cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro
+    command:
+      - "-port=9101"

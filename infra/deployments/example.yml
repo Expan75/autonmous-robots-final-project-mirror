@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  data-perception:
+    image: registry.git.chalmers.se/courses/tme290/2024/group11/team11-project-monorepo:robot-cone-perception-service-v1.0.4
+    network_mode: "host"
+    ipc: "host"
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --name=replay.rgb --width=640 --height=480 --verbose --YBRatio=0.5 --hBlueLow=80 --sBlueLow=0 --vBlueLow=0 --hBlueHigh=180 --sBlueHigh=200 --vBlueHigh=60 --hYellowLow=20 --sYellowLow=195 --vYellowLow=110 --hYellowHigh=30 --sYellowHigh=255 --vYellowHigh=255"
+  data-steering:
+    image: registry.git.chalmers.se/courses/tme290/2024/group11/team11-project-monorepo:robot-cone-steering-service-v1.0.6
+    network_mode: "host"
+    ipc: "host"
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --maxPed=0.8 --maxSter=38 --angDevRagSmall=0.2 --angDevRagMid=0.5 --angMidRange=0.25 --midRangeAcc=0.15 --otherRangeAcc=0.1 --midRangeDcc=0.1 --otherRangeDcc=0.13 --maxMinRatio=0.85"

@@ -1,0 +1,85 @@
+# Docker compose for all robot services
+version: "3.8"
+
+x-base: &service-base
+  restart: unless-stopped
+  labels:
+    org.label-schema.group: "team11-robot"
+
+x-defaults: &service-defaults
+  <<: *service-base
+  network_mode: service:tailscale
+  depends_on:
+    - tailscale
+
+services:
+  perception:
+    <<: *service-base
+    image: registry.git.chalmers.se/courses/tme290/2024/group11/team11-project-monorepo:robot-cone-perception-service-v1.0.1
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --name=img.bgr --width=640 --height=480 --verbose"
+
+  steering:
+    <<: *service-base
+    image: registry.git.chalmers.se/courses/tme290/2024/group11/team11-project-monorepo:robot-cone-steering-service-v1.0.1
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --maxPed=0.5"
+
+  # VPN client that doesn't mess with native host network settings
+  tailscale:
+    <<: *service-base
+    image: tailscale/tailscale:latest
+    cap_add:
+      - net_admin
+      - sys_module
+    volumes:
+      - ./tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_HOSTNAME=team11-robot
+      - TS_AUTHKEY=tskey-auth-kXdsQDr95921CNTRL-gpV35r9oSrLapPWivreskLzePvgUUcof
+
+  watchtower:
+    <<: *service-defaults
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 15 --http-api-metrics --http-api-token demotoken
+  # host level monitoring
+
+  nodeexporter:
+    <<: *service-defaults
+    image: prom/node-exporter:latest
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+  # host level monitoring
+  cadvisor:
+    <<: *service-defaults
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: robot-cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro
+    command:
+      - "-port=9101"
