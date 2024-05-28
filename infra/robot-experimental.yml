@@ -25,7 +25,7 @@ services:
       - /dev/net/tun:/dev/net/tun
     environment:
       - TS_HOSTNAME=team11-robot
-      - TS_AUTHKEY=tskey-auth-kXdsQDr95921CNTRL-gpV35r9oSrLapPWivreskLzePvgUUcof
+      - TS_AUTHKEY=
 
   watchtower:
     <<: *service-defaults
