@@ -8,6 +8,8 @@ Team members:
 - Kris Huang
 - Johannes Graule
 
+./assets/kiwi.mov
+
 ![System design](./images/system-design.png)
 
 ### Structure & Organisation
