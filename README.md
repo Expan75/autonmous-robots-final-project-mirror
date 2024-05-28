@@ -8,7 +8,7 @@ Team members:
 - Kris Huang
 - Johannes Graule
 
-(![](kiwi.mp4))
+![kiwi](kiwi.mp4)
 
 ![System design](./images/system-design.png)
 
