@@ -8,7 +8,9 @@ Team members:
 - Kris Huang
 - Johannes Graule
 
-![](./assets/kiwi.mov)
+<video width="320" height="240" controls>
+  <source src="./assets/kiwi.mov" type="video/mp4">
+</video>
 
 ![System design](./images/system-design.png)
 
