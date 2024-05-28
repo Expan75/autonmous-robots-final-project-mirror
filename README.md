@@ -8,7 +8,7 @@ Team members:
 - Kris Huang
 - Johannes Graule
 
-![kiwi](kiwi.mp4)
+https://github.com/Expan75/autonmous-robots-final-project-mirror/blob/final/kiwi.mp4
 
 ![System design](./images/system-design.png)
 
